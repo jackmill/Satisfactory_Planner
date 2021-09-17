@@ -1,0 +1,16 @@
+//
+// Created by Jackson Miller on 9/13/21.
+//
+
+#ifndef SATISFACTORY_PLANNER_CONFIG_H
+#define SATISFACTORY_PLANNER_CONFIG_H
+
+namespace config {
+
+const auto kProject_name = "${PROJECT_NAME}";
+const auto kProject_display_name = "${PROJECT_DISPLAY_NAME}";
+const auto kProject_version = "${PROJECT_VERSION}";
+
+}
+
+#endif //SATISFACTORY_PLANNER_CONFIG_H
