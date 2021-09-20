@@ -9,6 +9,8 @@ namespace config {
 
 const auto kProject_name = "${PROJECT_NAME}";
 const auto kProject_display_name = "${PROJECT_DISPLAY_NAME}";
+const auto kProject_organization_name = "${PROJECT_ORGANIZATION_NAME}";
+const auto kProject_organization_domain = "${PROJECT_ORGANIZATION_DOMAIN}";
 const auto kProject_version = "${PROJECT_VERSION}";
 
 }
