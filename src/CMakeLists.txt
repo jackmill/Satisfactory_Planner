@@ -4,3 +4,4 @@ include_directories(${PROJECT_BINARY_DIR}/include)
 
 add_subdirectory(data)
 add_subdirectory(ui)
+add_subdirectory(proofs)

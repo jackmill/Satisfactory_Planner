@@ -7,10 +7,12 @@
 #define SATISFACTORY_PLANNER_BUILDING_H
 
 #include <string>
+#include "nlohmann/json.hpp"
 
 namespace plannerData {
 
 class Building {
+  
   public:
 	Building();
 	

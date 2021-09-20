@@ -5,3 +5,8 @@
 
 #include "data/Building.h"
 
+namespace plannerData {
+
+
+
+}

@@ -8,12 +8,13 @@
 
 #include <string>
 #include <optional>
+#include "nlohmann/json.hpp"
 
 namespace plannerData {
 
 class Item {
   public:
-	explicit Item(std::string name);
+	Item(const std::string &recipe_str, const nlohmann::json &json);
 	
 	std::string name() { return name_; };
 	void setName(const std::string &name) { name_ = name; };

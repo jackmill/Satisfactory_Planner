@@ -7,6 +7,6 @@
 
 namespace plannerData {
 
-Library::Library() {}
+
 
 }
