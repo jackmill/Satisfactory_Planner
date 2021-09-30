@@ -4,6 +4,7 @@
  */
 
 #include <QFile>
+#include <cmath>
 
 #include "ItemButton.h"
 

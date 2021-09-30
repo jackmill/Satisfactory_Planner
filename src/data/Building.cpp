@@ -5,8 +5,14 @@
 
 #include "data/Building.h"
 
-namespace plannerData {
+namespace gameData {
 
+Building::Building(const std::string &building_name, const DBMap &db) :
+    class_name_(building_name) {
 
+    name_ = findKey(class_name_, "mDisplayName", db);
+    std::string power_string = findKey(class_name_, "mPowerConsumption", db);
+    power_ = std::stoi(power_string);
+}
 
 }

@@ -2,15 +2,9 @@
 // Created by Jackson Miller on 9/13/21.
 //
 #include <QMenuBar>
-#include <fstream>
-#include <iostream>
 #include <string>
-#include <nlohmann/json.hpp>
 #include <QTextEdit>
-#include <QTextStream>
-#include <QFile>
-#include <QJsonDocument>
-#include <QJsonObject>
+#include <QMessageBox>
 
 #include "settings.h"
 #include "MainWindow.h"
@@ -25,14 +19,21 @@ namespace ui {
  * @param parent
  */
 MainWindow::MainWindow(QWidget *parent)
-    : db_(new QJsonArray),
-	QMainWindow(parent) {
+    : db_ (new gameData::Library),
+    QMainWindow(parent) {
     setWindowTitle(tr(config::kProject_display_name));
 	
-	// TODO: Implement db updating/changing/etc
-	if (!Settings::GetJsonDataPath().isEmpty()) {
-		*db_ = LoadDb(Settings::GetJsonDataPath());
-	}
+	// Load database from given Docs.json file, either stored or chosen by user
+	if (Settings::GetJsonDataPath().isEmpty()) {
+		QMessageBox::information(this,
+                                 tr("No Docs.json file found"),
+                                 tr("Choose Docs.json file path in settings"));
+
+        SDataSource();
+
+	} else {
+        *db_ = gameData::Library(Settings::GetJsonDataPath().toStdString());
+    }
 	
 	contents_ = new QWidget(this);
 	setCentralWidget(contents_);
@@ -46,10 +47,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     InitActions();
     InitMenu();
-	InitRecipes();
-	
-	test_item_ = new ItemButton("Plastic", 1638, db_, this);
-	layout_->addWidget(test_item_);
+
+    _TestItemList();
+
+    recipes_from_item_ = new QComboBox(contents_);
+    splitter_->addWidget(recipes_from_item_);
+
+    connect(item_list_, &QComboBox::currentTextChanged, this, &MainWindow::_TestListRecipes);
 }
 
 /**
@@ -85,71 +89,28 @@ void MainWindow::InitMenu() {
     menu_help->addAction(actions_.act_help);
 }
 
-/**
- * +++PROOF OF CONCEPT+++
- */
-void MainWindow::InitRecipes() {
-    recipe_list_ = new QComboBox(this);
-    QStringList recipe_list;
+void MainWindow::_TestItemList() {
+    item_list_ = new QComboBox(contents_);
 
-    // Look through each Array object
-	for (auto native_class = db_->cbegin(); native_class != db_->cend(); ++native_class) {
-		QJsonObject native_class_object = native_class->toObject();
-		
-		// Check "NativeClass" Key
-		if (native_class_object.value("NativeClass") == "Class'/Script/FactoryGame.FGRecipe'") {
-			// Look through each "Classes" array
-			QJsonArray class_array = native_class_object.value("Classes").toArray();
-			for (auto item = class_array.cbegin(); item != class_array.cend(); ++item) {
-				QString produced_in = item->toObject().value("mProducedIn").toString();
-				if (produced_in.contains("Build_ConstructorMk1_C") ||
-					produced_in.contains("Build_AssemblerMk1_C") ||
-					produced_in.contains("Build_ManufacturerMk1_C") ||
-					produced_in.contains("Build_Blender_C") ||
-					produced_in.contains("Build_OilRefinery_C") ||
-					produced_in.contains("Build_Packager_C") ||
-					produced_in.contains("Build_SmelterMk1_C") ||
-					produced_in.contains("Build_FoundryMk1_C") ||
-					produced_in.contains("Build_HadronCollider_C")
-				) {
-					recipe_list.push_back(item->toObject().value("mDisplayName").toString());
-				}
-			}
-		}
-	}
+    QStringList item_names;
+    for (const auto &item : db_->GetItems()) {
+        item_names.push_back(QString::fromStdString(item.name()));
+    }
+    item_names.sort();
+    item_list_->addItems(item_names);
 
-	recipe_list.sort();
-    recipe_list_->addItems(recipe_list);
-	splitter_->addWidget(recipe_list_);
+    splitter_->addWidget(item_list_);
 }
 
-/**
- * Creates a QJsonDocument object from a given file
- * @param file File Path
- * @return QJsonDocument
- */
-QJsonArray MainWindow::LoadDb(const QString &file) {
-	// TODO: Deal with UTF-16LE encoding
-	
-	QFile json_file(file);
-	QByteArray file_contents;
-	QJsonDocument json_doc;
+void MainWindow::_TestListRecipes() {
+    recipes_from_item_->clear();
 
-	try {
-		json_file.open(QFile::ReadOnly);
-		file_contents = json_file.readAll();
-		json_file.close();
-	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
-	}
-	
-	try {
-		json_doc = QJsonDocument().fromJson(file_contents);
-	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
-	}
-	
-	return json_doc.array();
+    QStringList recipe_label_list;
+    for (const auto &recipe : db_->FindRecipes(item_list_->currentText().toStdString())) {
+        recipe_label_list.push_back(QString::fromStdString(recipe.name()));
+    }
+    recipe_label_list.sort();
+    recipes_from_item_->addItems(recipe_label_list);
 }
 
 /**
@@ -158,7 +119,7 @@ QJsonArray MainWindow::LoadDb(const QString &file) {
 void MainWindow::SDataSource() {
 	auto data_source_dialog = new DataSourceDialog(this);
 	if (data_source_dialog->exec() == QDialog::Accepted) {
-		*db_ = LoadDb(Settings::GetJsonDataPath());
+        *db_ = gameData::Library(Settings::GetJsonDataPath().toStdString());
 	}
 }
 

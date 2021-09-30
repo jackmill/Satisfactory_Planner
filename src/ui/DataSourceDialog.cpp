@@ -17,7 +17,7 @@ namespace ui {
 DataSourceDialog::DataSourceDialog(QWidget *parent) :
 		QDialog(parent) {
 	setWindowTitle(tr("Select Data Source"));
-	setFixedSize(500, 70);
+	resize(600, 100);
 	
 	layout_ = new QVBoxLayout(this);
 	auto filepath_layout = new QHBoxLayout();
@@ -45,7 +45,7 @@ DataSourceDialog::DataSourceDialog(QWidget *parent) :
 void DataSourceDialog::accept() {
 	if (json_path_->text().isEmpty()) {
 		QMessageBox::critical(this,
-							  tr("JSON plannerData file required"),
+							  tr("JSON gameData file required"),
 							  tr("You can't just leave this blank.  How did you even manage to click OK?"));
 		return;
 	}

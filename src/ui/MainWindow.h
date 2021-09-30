@@ -10,8 +10,8 @@
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QSplitter>
-#include <QJsonArray>
 
+#include "data/Library.h"
 #include "subfactoryPane/SubfactoryPane.h"
 #include "elements/ItemButton.h"
 
@@ -40,15 +40,17 @@ class MainWindow : public QMainWindow {
 	QHBoxLayout* layout_ = nullptr;
 	QSplitter* splitter_ = nullptr;
  
-    QComboBox* recipe_list_ = nullptr;
+    QComboBox* item_list_ = nullptr;
+    QComboBox* recipes_from_item_ = nullptr;
 	ItemButton* test_item_ = nullptr;
-	
-	std::shared_ptr<QJsonArray> db_;
-	QJsonArray LoadDb(const QString &file);
-	
-    void InitRecipes();
+
+    std::shared_ptr<gameData::Library> db_;
+
     void InitActions();
     void InitMenu();
+
+    void _TestItemList();
+    void _TestListRecipes();
 
   private Q_SLOTS:
     // Actions

@@ -8,18 +8,23 @@
 
 #include <string>
 #include "nlohmann/json.hpp"
+#include "DBMap.h"
 
-namespace plannerData {
+namespace gameData {
 
 class Building {
   
   public:
-	Building();
+//	Building(const std::string &building_name, const nlohmann::json &json_db);
+    Building(const std::string &building_name, const DBMap &db);
 	
-	std::string name() { return name_; };
+	[[nodiscard]] std::string name() const { return name_; };
+    [[nodiscard]] int power() const { return power_; };
+    void setPower(const int &power) { power_ = power; };
   
   private:
 	std::string name_;
+    std::string class_name_;
 	int power_;
 };
 
