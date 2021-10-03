@@ -9,7 +9,7 @@
 
 #include "data/Library.h"
 
-namespace gameData {
+namespace data {
 
 Library::Library(const std::string &file_path) {
     // Open the file and make the json db

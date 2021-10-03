@@ -5,7 +5,7 @@
 
 #include "data/Item.h"
 
-namespace gameData {
+namespace data {
 
 /**
  * Constructor for an item with no amount

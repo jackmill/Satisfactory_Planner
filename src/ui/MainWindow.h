@@ -44,7 +44,7 @@ class MainWindow : public QMainWindow {
     QComboBox* recipes_from_item_ = nullptr;
 	ItemButton* test_item_ = nullptr;
 
-    std::shared_ptr<gameData::Library> db_;
+    std::shared_ptr<data::Library> db_;
 
     void InitActions();
     void InitMenu();

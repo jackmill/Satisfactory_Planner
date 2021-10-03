@@ -10,7 +10,7 @@
 
 int main() {
     std::cout << "Starting..." << std::endl;
-    gameData::Library library = gameData::Library("resources/Docs 2.json");
+    data::Library library = data::Library("resources/Docs.json");
     std::cout << "Done" << std::endl;
 
     return 0;

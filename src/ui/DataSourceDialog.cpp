@@ -45,7 +45,7 @@ DataSourceDialog::DataSourceDialog(QWidget *parent) :
 void DataSourceDialog::accept() {
 	if (json_path_->text().isEmpty()) {
 		QMessageBox::critical(this,
-							  tr("JSON gameData file required"),
+							  tr("JSON data file required"),
 							  tr("You can't just leave this blank.  How did you even manage to click OK?"));
 		return;
 	}

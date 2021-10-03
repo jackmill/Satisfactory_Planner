@@ -13,7 +13,7 @@
 
 #include "Recipe.h"
 
-namespace gameData {
+namespace data {
 
 class Library {
   public:
@@ -24,10 +24,12 @@ class Library {
     std::vector<Recipe> FindRecipes(const Item &target_product);
     std::vector<Recipe> FindRecipes(const std::string &target_display_name);
 	
+	std::unordered_map<std::string, Item> items_;
+	
   private:
     DBMap db_;
     std::unordered_map<std::string, Recipe> recipes_;
-    std::unordered_map<std::string, Item> items_;
+    
 };
 
 enum class Encoding {

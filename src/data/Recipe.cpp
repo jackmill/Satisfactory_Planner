@@ -5,7 +5,7 @@
 
 #include "data/Recipe.h"
 
-namespace gameData {
+namespace data {
 
 /**
  *

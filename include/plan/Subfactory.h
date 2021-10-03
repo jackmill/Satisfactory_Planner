@@ -8,17 +8,21 @@
 #include <string>
 #include <vector>
 
+#include "ProductLine.h"
 #include "data/Library.h"
 
 namespace plan {
 
 class Subfactory {
   public:
+	
+	
 
   private:
-    // Container of FloorSlots
     std::string label_;
+    std::string icon_string_;
     std::vector<Item> target_products_;
+	std::vector<Subfactory> product_lines_;
 
 };
 

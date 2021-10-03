@@ -19,7 +19,7 @@ namespace ui {
  * @param parent
  */
 MainWindow::MainWindow(QWidget *parent)
-    : db_ (new gameData::Library),
+    : db_ (new data::Library),
     QMainWindow(parent) {
     setWindowTitle(tr(config::kProject_display_name));
 	
@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
         SDataSource();
 
 	} else {
-        *db_ = gameData::Library(Settings::GetJsonDataPath().toStdString());
+        *db_ = data::Library(Settings::GetJsonDataPath().toStdString());
     }
 	
 	contents_ = new QWidget(this);
@@ -93,8 +93,8 @@ void MainWindow::_TestItemList() {
     item_list_ = new QComboBox(contents_);
 
     QStringList item_names;
-    for (const auto &item : db_->GetItems()) {
-        item_names.push_back(QString::fromStdString(item.name()));
+    for (const auto &item : db_->items_) {
+        item_names.push_back(QString::fromStdString(item.second.name()));
     }
     item_names.sort();
     item_list_->addItems(item_names);
@@ -119,7 +119,7 @@ void MainWindow::_TestListRecipes() {
 void MainWindow::SDataSource() {
 	auto data_source_dialog = new DataSourceDialog(this);
 	if (data_source_dialog->exec() == QDialog::Accepted) {
-        *db_ = gameData::Library(Settings::GetJsonDataPath().toStdString());
+        *db_ = data::Library(Settings::GetJsonDataPath().toStdString());
 	}
 }
 

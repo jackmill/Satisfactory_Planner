@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include "nlohmann/json.hpp"
 
-namespace gameData {
+namespace data {
 
 using DocsObject = std::unordered_map<std::string, nlohmann::json>;
 using DBMap = std::unordered_map<std::string, DocsObject>;
@@ -52,6 +52,6 @@ inline std::string findKey(const std::string &class_name, const std::string &key
     return found;
 }
 
-} // namespace gameData
+} // namespace data
 
 #endif //SATISFACTORY_PLANNER_DBMAP_H

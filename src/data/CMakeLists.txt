@@ -1,4 +1,4 @@
-add_library(planner_data
+add_library(data
         Item.cpp
         Recipe.cpp
         Building.cpp
@@ -8,4 +8,4 @@ add_library(planner_data
 find_package(nlohmann_json REQUIRED)
 
 
-target_link_libraries(planner_data nlohmann_json::nlohmann_json)
+target_link_libraries(data nlohmann_json::nlohmann_json)

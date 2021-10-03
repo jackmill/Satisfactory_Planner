@@ -5,14 +5,17 @@
 #ifndef SATISFACTORY_PLANNER_FACTORY_H
 #define SATISFACTORY_PLANNER_FACTORY_H
 
+#include <vector>
+
+#include "Subfactory.h"
+
 namespace plan {
 
 class Factory {
   public:
+    Factory() = default;
 
-  private:
-    // Container of subfactories
-
+    std::vector<Subfactory> subfactories;
 };
 
 } // namespace plan

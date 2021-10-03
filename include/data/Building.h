@@ -10,7 +10,7 @@
 #include "nlohmann/json.hpp"
 #include "DBMap.h"
 
-namespace gameData {
+namespace data {
 
 class Building {
   

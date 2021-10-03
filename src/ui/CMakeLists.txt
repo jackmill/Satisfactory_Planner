@@ -1,5 +1,6 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 add_executable(${PROJECT_NAME}
         main.cpp
@@ -21,8 +22,6 @@ add_executable(${PROJECT_NAME}
         samples/TestButton.cpp
         )
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-
 include(FetchContent)
 FetchContent_Declare(
         QSettingsContainer
@@ -32,6 +31,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(QSettingsContainer)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        planner_data
+        data
+        plan
         Qt5::Widgets
         QSettingsContainer)

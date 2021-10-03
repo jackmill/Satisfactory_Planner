@@ -13,7 +13,7 @@
 
 #include "DBMap.h"
 
-namespace gameData {
+namespace data {
 
 class Item {
   public:
@@ -27,7 +27,7 @@ class Item {
     std::string className() const { return class_name_; };
 	void setName(const std::string &name) { name_ = name; };
 	
-	int amount();
+	int amount() const;
 	void setAmount(const int &amount);
     void clearAmount() { amount_.reset(); };
   
@@ -39,6 +39,6 @@ class Item {
 	
 };
 
-} // namespace gameData
+} // namespace data
 
 #endif //SATISFACTORY_PLANNER_ITEM_H

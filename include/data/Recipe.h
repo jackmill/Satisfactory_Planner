@@ -14,7 +14,7 @@
 #include "data/Item.h"
 #include "data/Building.h"
 
-namespace gameData {
+namespace data {
 
 class Recipe {
   public:
