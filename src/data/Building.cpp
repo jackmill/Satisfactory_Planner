@@ -5,7 +5,7 @@
 
 #include "data/Building.h"
 
-namespace gameData {
+namespace data {
 
 Building::Building(const std::string &building_name, const DBMap &db) :
     class_name_(building_name) {
