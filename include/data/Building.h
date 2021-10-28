@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file Building.h
- * Created by jackm on 9/19/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-19
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_BUILDING_H

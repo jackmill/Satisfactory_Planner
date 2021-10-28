@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file ItemSelectionDialog.h
- * Created by jackm on 9/19/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-19
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_ITEMSELECTIONDIALOG_H
@@ -9,15 +13,30 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QVBoxLayout>
-#include <QLineEdit>
+#include <QComboBox>
+#include <QSpinBox>
+
+#include "data/Library.h"
+#include "ItemListModel.h"
 
 namespace ui {
 
 class ItemSelectionDialog : public QDialog {
   public:
-	ItemSelectionDialog(QWidget* parent = nullptr);
+	explicit ItemSelectionDialog(std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+
+    void setFromItem(const data::Item &item);
+
+    data::Item getSelectedItem();
+    int getAmount() { return amount_->value(); }
 	
   private:
+    std::shared_ptr<data::Library> db_;
+    ItemListModel* model_ = nullptr;
+
+    QComboBox* item_ = nullptr;
+    QSpinBox* amount_ = nullptr;
+
 	QDialogButtonBox* actions_ = nullptr;
 	QVBoxLayout* layout_ = nullptr;
 };

@@ -1,6 +1,11 @@
-//
-// Created by Jackson Miller on 9/24/21.
-//
+/**
+ * @project Satisfactory_Planner
+ * @file DBMap.h
+ *
+ * @author Jackson Miller
+ * @date 2021-09-24
+ * @copyright (c) 2021 Jackson Miller
+ */
 
 #ifndef SATISFACTORY_PLANNER_DBMAP_H
 #define SATISFACTORY_PLANNER_DBMAP_H

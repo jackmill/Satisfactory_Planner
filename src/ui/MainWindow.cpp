@@ -1,6 +1,12 @@
-//
-// Created by Jackson Miller on 9/13/21.
-//
+/**
+ * @project Satisfactory_Planner
+ * @file MainWindow.cpp
+ *
+ * @author Jackson Miller
+ * @date 2021-09-13
+ * @copyright (c) 2021 Jackson Miller
+ */
+
 #include <QMenuBar>
 #include <string>
 #include <QTextEdit>
@@ -14,14 +20,12 @@
 
 namespace ui {
 
-/**
- *
- * @param parent
- */
 MainWindow::MainWindow(QWidget *parent)
     : db_ (new data::Library),
+    factory_(new plan::Factory),
     QMainWindow(parent) {
     setWindowTitle(tr(config::kProject_display_name));
+    resize(800, 800);
 	
 	// Load database from given Docs.json file, either stored or chosen by user
 	if (Settings::GetJsonDataPath().isEmpty()) {
@@ -32,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
         SDataSource();
 
 	} else {
-        *db_ = data::Library(Settings::GetJsonDataPath().toStdString());
+        *db_ = data::Library(Settings::GetJsonDataPath().toStdString(), Settings::GetIncludeEvents());
     }
 	
 	contents_ = new QWidget(this);
@@ -42,23 +46,26 @@ MainWindow::MainWindow(QWidget *parent)
 	splitter_ = new QSplitter(contents_);
 	layout_->addWidget(splitter_);
 	
-	subfactory_pane_ = new SubfactoryPane(contents_);
+	subfactory_pane_ = new SubfactoryPane(factory_, db_, contents_);
+    connect(subfactory_pane_, &SubfactoryPane::SSubfactoryChanged, this, &MainWindow::SSubfactoryChanged);
 	splitter_->addWidget(subfactory_pane_);
+
+    production_pane_ = new ProductionPane(factory_->subfactories_.at(0), db_, this);
+    splitter_->addWidget(production_pane_);
 
     InitActions();
     InitMenu();
 
-    _TestItemList();
+//    _TestItemList();
 
-    recipes_from_item_ = new QComboBox(contents_);
-    splitter_->addWidget(recipes_from_item_);
+//    test_icon_ = new ItemIcon(db_->findItem("Battery"), this);
+//    layout_->addWidget(test_icon_);
+//    recipes_from_item_ = new QComboBox(contents_);
+//    splitter_->addWidget(recipes_from_item_);
 
-    connect(item_list_, &QComboBox::currentTextChanged, this, &MainWindow::_TestListRecipes);
+//    connect(item_list_, &QComboBox::currentTextChanged, this, &MainWindow::_TestListRecipes);
 }
 
-/**
- *
- */
 void MainWindow::InitActions() {
     // File
 	// Data Source
@@ -75,9 +82,6 @@ void MainWindow::InitActions() {
     connect(actions_.act_help, &QAction::triggered, this, &MainWindow::SAbout);
 }
 
-/**
- *
- */
 void MainWindow::InitMenu() {
     // File
     QMenu* menu_file = menuBar()->addMenu(tr("&File"));
@@ -90,45 +94,37 @@ void MainWindow::InitMenu() {
 }
 
 void MainWindow::_TestItemList() {
-    item_list_ = new QComboBox(contents_);
-
-    QStringList item_names;
-    for (const auto &item : db_->items_) {
-        item_names.push_back(QString::fromStdString(item.second.name()));
-    }
-    item_names.sort();
-    item_list_->addItems(item_names);
-
-    splitter_->addWidget(item_list_);
+//    item_list_ = new ItemButton(db_->findItem("Plastic"), db_, contents_);
+//    splitter_->addWidget(item_list_);
 }
 
-void MainWindow::_TestListRecipes() {
-    recipes_from_item_->clear();
+//void MainWindow::_TestListRecipes() {
+//    recipes_from_item_->clear();
+//
+//    QStringList recipe_label_list;
+//    for (const auto &recipe : db_->FindRecipes(item_list_->currentText().toStdString())) {
+//        recipe_label_list.push_back(QString::fromStdString(recipe.name()));
+//    }
+//    recipe_label_list.sort();
+//    recipes_from_item_->addItems(recipe_label_list);
+//}
 
-    QStringList recipe_label_list;
-    for (const auto &recipe : db_->FindRecipes(item_list_->currentText().toStdString())) {
-        recipe_label_list.push_back(QString::fromStdString(recipe.name()));
-    }
-    recipe_label_list.sort();
-    recipes_from_item_->addItems(recipe_label_list);
-}
-
-/**
-*
-*/
 void MainWindow::SDataSource() {
-	auto data_source_dialog = new DataSourceDialog(this);
+	auto* data_source_dialog = new DataSourceDialog(this);
 	if (data_source_dialog->exec() == QDialog::Accepted) {
-        *db_ = data::Library(Settings::GetJsonDataPath().toStdString());
+        *db_ = data::Library(Settings::GetJsonDataPath().toStdString(), Settings::GetIncludeEvents());
 	}
+    data_source_dialog->deleteLater();
 }
 
-/**
- *
- */
+
 void MainWindow::SAbout() {
     auto *about_dialog = new AboutDialog(this);
     about_dialog->exec();
+}
+
+void MainWindow::SSubfactoryChanged() {
+//    const auto alert = QMessageBox::information(this, "I saw that", "You changed a thing");
 }
 
 } // namespace ui

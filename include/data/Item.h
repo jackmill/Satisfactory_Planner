@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file Item.h
- * Created by jackm on 9/17/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-17
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_ITEM_H
@@ -20,14 +24,19 @@ class Item {
     Item(const std::string &class_name, const DBMap &db);
     Item(const std::string &class_name, const int &amount, const DBMap &db);
 
-    inline bool operator== (const Item &rhs) const { return this->class_name_ == rhs.class_name_; };
-    inline bool operator!= (const Item &rhs) const { return !(this->class_name_ == rhs.class_name_); };
-	
-	std::string name() const { return name_; };
-    std::string className() const { return class_name_; };
+    bool operator== (const Item &rhs) const { return this->class_name_ == rhs.class_name_; };
+    bool operator!= (const Item &rhs) const { return !(this->class_name_ == rhs.class_name_); };
+    bool operator<(const Item &rhs) const { return name_ < rhs.name_; }
+    bool operator>(const Item &rhs) const { return rhs < *this; }
+    bool operator<=(const Item &rhs) const { return !(rhs < *this); }
+    bool operator>=(const Item &rhs) const { return !(*this < rhs); }
+    Item& operator= (const Item &rhs) = default;
+
+    [[nodiscard]] std::string name() const { return name_; };
+    [[nodiscard]] std::string className() const { return class_name_; };
 	void setName(const std::string &name) { name_ = name; };
 	
-	int amount() const;
+	[[nodiscard]] int amount() const;
 	void setAmount(const int &amount);
     void clearAmount() { amount_.reset(); };
   

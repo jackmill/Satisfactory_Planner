@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file Building.cpp
- * Created by jackm on 9/19/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-19
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #include "data/Building.h"

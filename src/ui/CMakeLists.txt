@@ -3,23 +3,27 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 add_executable(${PROJECT_NAME}
+        ${PROJECT_SOURCE_DIR}/resources/resources.qrc
         main.cpp
         MainWindow.cpp
         AboutDialog.cpp
         DataSourceDialog.cpp
 
-        elements/BasicItemButton.cpp
+        elements/ItemIcon.cpp
         elements/ItemButton.cpp
-        elements/ItemButtonLabel.cpp
         elements/ItemSelectionDialog.cpp
-        elements/ItemSelectionIconGrid.cpp
+        elements/ItemListModel.cpp
 
-        mainTable/FactoryTable.cpp
+        mainTable/ProductionPane.cpp
+        mainTable/ProductionTable.cpp
 
         subfactoryPane/SubfactoryPane.cpp
         subfactoryPane/SubfactoryInfo.cpp
+        subfactoryPane/SubfactoryListModel.cpp
+        subfactoryPane/SubfactoryEditDialog.cpp
 
         samples/TestButton.cpp
+
         )
 
 include(FetchContent)
@@ -31,7 +35,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(QSettingsContainer)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        data
         plan
         Qt5::Widgets
         QSettingsContainer)

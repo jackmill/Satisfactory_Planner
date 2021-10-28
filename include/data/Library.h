@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file Library.h
- * Created by jackm on 9/19/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-19
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_LIBRARY_H
@@ -18,18 +22,19 @@ namespace data {
 class Library {
   public:
 	explicit Library() = default;
-    explicit Library(const std::string &file_path);
+    explicit Library(const std::string &file_path, bool include_events);
 
-    std::vector<Item> GetItems();
-    std::vector<Recipe> FindRecipes(const Item &target_product);
-    std::vector<Recipe> FindRecipes(const std::string &target_display_name);
-	
-	std::unordered_map<std::string, Item> items_;
-	
+    [[nodiscard]] Item findItem(const std::string &item_display_name) const { return items_.at(item_display_name); };
+
+    [[nodiscard]] std::vector<Recipe> FindRecipes(const Item &target_product) const;
+    [[nodiscard]] std::vector<Recipe> FindRecipes(const std::string &target_display_name) const;
+    [[nodiscard]] const std::vector<Item> &getItemsSorted() const { return items_sorted_; }
+
   private:
     DBMap db_;
     std::unordered_map<std::string, Recipe> recipes_;
-    
+    std::unordered_map<std::string, Item> items_;
+    std::vector<Item> items_sorted_;
 };
 
 enum class Encoding {

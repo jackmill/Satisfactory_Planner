@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file Library.cpp
- * Created by jackm on 9/19/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-19
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #include <functional>
@@ -11,7 +15,7 @@
 
 namespace data {
 
-Library::Library(const std::string &file_path) {
+Library::Library(const std::string &file_path, bool include_events) {
     // Open the file and make the json db
 //    std::filesystem::path in_path(file_path);
 //    if (!std::filesystem::is_regular_file(in_path)) {
@@ -26,6 +30,13 @@ Library::Library(const std::string &file_path) {
 
     // Recipes
     for (const auto &recipe : db_.at("Class'/Script/FactoryGame.FGRecipe'")) {
+        // Check for Event-ness, skip this recipe if it is
+        std::string full_name = recipe.second.at("FullName");
+        bool isEvent = full_name.find("/Events/") != std::string::npos;
+        if (isEvent && !include_events) {
+            continue;
+        }
+
         Recipe temp_recipe = Recipe(recipe.first, db_);
         if (temp_recipe.isMachined()) {
             recipes_.emplace(temp_recipe.className(), temp_recipe);
@@ -47,23 +58,15 @@ Library::Library(const std::string &file_path) {
             if (!listed) {
                 product.clearAmount();
                 items_.emplace(product.name(), product);
+                items_sorted_.emplace_back(product);
             }
         }
     }
 
+    std::sort(items_sorted_.begin(), items_sorted_.end());
 }
 
-std::vector<Item> Library::GetItems() {
-    std::vector<Item> output_list;
-
-    for (const auto &item : items_) {
-        output_list.push_back(item.second);
-    }
-
-    return output_list;
-}
-
-std::vector<Recipe> Library::FindRecipes(const Item &target_product) {
+std::vector<Recipe> Library::FindRecipes(const Item &target_product) const {
 
     std::vector<Recipe> output_list;
 
@@ -78,9 +81,10 @@ std::vector<Recipe> Library::FindRecipes(const Item &target_product) {
     return output_list;
 }
 
-std::vector<Recipe> Library::FindRecipes(const std::string &target_display_name) {
+std::vector<Recipe> Library::FindRecipes(const std::string &target_display_name) const {
     return FindRecipes(items_.at(target_display_name));
 }
+
 
 /**
  * Guess the encoding based on the byte-order mark (BOM) at the start of the file.\n\n

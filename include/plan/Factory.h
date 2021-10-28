@@ -1,6 +1,11 @@
-//
-// Created by Jackson Miller on 9/25/21.
-//
+/**
+ * @project Satisfactory_Planner
+ * @file Factory.h
+ *
+ * @author Jackson Miller
+ * @date 2021-09-25
+ * @copyright (c) 2021 Jackson Miller
+ */
 
 #ifndef SATISFACTORY_PLANNER_FACTORY_H
 #define SATISFACTORY_PLANNER_FACTORY_H
@@ -15,7 +20,7 @@ class Factory {
   public:
     Factory() = default;
 
-    std::vector<Subfactory> subfactories;
+    std::vector<Subfactory> subfactories_;
 };
 
 } // namespace plan

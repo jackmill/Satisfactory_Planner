@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file DataSourceDialog.h
- * Created by jackm on 9/18/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-18
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_DATASOURCEDIALOG_H
@@ -10,6 +14,7 @@
 #include <QDialogButtonBox>
 #include <QVBoxLayout>
 #include <QLineEdit>
+#include <QCheckBox>
 
 namespace ui {
 
@@ -21,6 +26,7 @@ class DataSourceDialog : public QDialog {
   private:
 	QVBoxLayout* layout_ = nullptr;
 	QLineEdit* json_path_ = nullptr;
+    QCheckBox* events_ = nullptr;
 	QDialogButtonBox* actions_ = nullptr;
 	
 	[[nodiscard]] bool allowOk() const;

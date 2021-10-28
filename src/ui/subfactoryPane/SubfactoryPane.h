@@ -1,6 +1,10 @@
 /**
- * @file subfactoryPane.h
- * Created by jackm on 9/17/2021
+ * @project Satisfactory_Planner
+ * @file SubfactoryPane.h
+ *
+ * @author Jackson Miller
+ * @date 2021-09-17
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_SUBFACTORYPANE_H
@@ -10,15 +14,20 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 #include <QToolBar>
+#include <QListView>
 
 #include "SubfactoryInfo.h"
+#include "SubfactoryListModel.h"
+
+#include "plan/Factory.h"
 
 namespace ui {
 
 class SubfactoryPane : public QWidget {
+  Q_OBJECT
   public:
-	SubfactoryPane(QWidget *parent = nullptr);
-  
+	SubfactoryPane(std::shared_ptr<plan::Factory> factory, std::shared_ptr<data::Library> db, QWidget *parent = nullptr);
+
   private:
 	struct Actions {
 		QAction* act_add = nullptr;
@@ -28,10 +37,24 @@ class SubfactoryPane : public QWidget {
 	
 	Actions actions_;
 	QToolBar* toolbar_;
+
+    std::shared_ptr<data::Library> db_;
+    std::shared_ptr<plan::Factory> factory_;
+
+    SubfactoryListModel* subfactory_model_ = nullptr;
+    QListView* subfactory_list_ = nullptr;
 	
 	QVBoxLayout *layout_ = nullptr;
 	
 	void InitToolbar();
+
+  private Q_SLOTS:
+    void SAddSubfactory();
+    void SEditSubfactory();
+    void SRemoveSubfactory();
+
+  Q_SIGNALS:
+    void SSubfactoryChanged();
 	
 };
 

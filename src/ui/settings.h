@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file settings.h
- * Created by jackm on 9/18/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-18
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_SETTINGS_H
@@ -11,6 +15,7 @@
 class Settings : public dragoonboots::qsettingscontainer::QSettingsContainer {
   public:
 	DGSETTINGS_SETTING(QString, JsonDataPath, "")
+    DGSETTINGS_SETTING(bool, IncludeEvents, false)
 };
 
 #endif //SATISFACTORY_PLANNER_SETTINGS_H

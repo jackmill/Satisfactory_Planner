@@ -1,6 +1,11 @@
-//
-// Created by Jackson Miller on 9/13/21.
-//
+/**
+ * @project Satisfactory_Planner
+ * @file AboutDialog.h
+ *
+ * @author Jackson Miller
+ * @date 2021-09-13
+ * @copyright (c) 2021 Jackson Miller
+ */
 
 #ifndef SATISFACTORY_PLANNER_ABOUTDIALOG_H
 #define SATISFACTORY_PLANNER_ABOUTDIALOG_H

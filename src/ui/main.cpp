@@ -1,3 +1,12 @@
+/**
+ * @project Satisfactory_Planner
+ * @file main.cpp
+ *
+ * @author Jackson Miller
+ * @date 2021-09-13
+ * @copyright (c) 2021 Jackson Miller
+ */
+
 #include "projectconfig.h"
 
 #include <QApplication>

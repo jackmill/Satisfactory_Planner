@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file SubfactoryInfo.h
- * Created by jackm on 9/17/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-17
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_SUBFACTORYINFO_H

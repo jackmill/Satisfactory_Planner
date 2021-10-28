@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file DataSourceDialog.cpp
- * Created by jackm on 9/18/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-18
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #include <QPushButton>
@@ -31,6 +35,10 @@ DataSourceDialog::DataSourceDialog(QWidget *parent) :
 	auto choose_file = new QPushButton(tr("Choose..."), this);
 	connect(choose_file, &QPushButton::clicked, this, &DataSourceDialog::ChooseJsonPath);
 	filepath_layout->addWidget(choose_file);
+
+    // Events
+    events_ = new QCheckBox(tr("Include Events (FICSMAS)"), this);
+    events_->setChecked(Settings::GetIncludeEvents());
 	
 	// Button Actions
 	actions_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -39,6 +47,7 @@ DataSourceDialog::DataSourceDialog(QWidget *parent) :
 	connect(actions_, &QDialogButtonBox::rejected, this, &DataSourceDialog::reject);
 	
 	layout_->addLayout(filepath_layout);
+    layout_->addWidget(events_);
 	layout_->addWidget(actions_);
 }
 
@@ -59,6 +68,7 @@ void DataSourceDialog::accept() {
 	}
 	
 	Settings::SetJsonDataPath(json_path_->text());
+    Settings::SetIncludeEvents(events_->isChecked());
 	QDialog::accept();
 }
 

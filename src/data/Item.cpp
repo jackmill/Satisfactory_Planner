@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file Item.cpp
- * Created by jackm on 9/17/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-17
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #include "data/Item.h"
@@ -37,7 +41,7 @@ Item::Item(const std::string &class_name, const int &amount, const DBMap &db) :
 
 }
 
-int Item::amount() {
+int Item::amount() const {
 	if (amount_.has_value()) {
 		return amount_.value();
 	} else {

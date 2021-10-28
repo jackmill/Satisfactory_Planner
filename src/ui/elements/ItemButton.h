@@ -1,39 +1,31 @@
 /**
+ * @project Satisfactory_Planner
  * @file ItemButton.h
- * Created by jackm on 9/18/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-10-05
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_ITEMBUTTON_H
 #define SATISFACTORY_PLANNER_ITEMBUTTON_H
 
-#include <QPushButton>
-#include <QIcon>
-#include <QVBoxLayout>
-#include <QLabel>
-
-#include "BasicItemButton.h"
-#include "ItemButtonLabel.h"
+#include "ItemIcon.h"
 
 namespace ui {
 
-class ItemButton : public BasicItemButton {
-  Q_OBJECT
-  
+class ItemButton : public ItemIcon {
+    Q_OBJECT
   public:
-	ItemButton(QString display_name, const int &item_count, std::shared_ptr<QJsonArray> &db, QWidget* parent = nullptr);
-	
-	void setItemCount(const int &count);
-	
+    ItemButton(data::Item &item, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+
+    void selectItem(const data::Item &item);
+
   private:
-	QVBoxLayout* layout_ = nullptr;
-	ItemButtonLabel* item_count_label_ = nullptr;
-	int item_count_;
-	
-	std::shared_ptr<QJsonArray> db_;
-	
-	QString formatItemNumber(const int &num);
+    std::shared_ptr<data::Library> db_;
+
 };
 
-} // namespace ui
+}
 
 #endif //SATISFACTORY_PLANNER_ITEMBUTTON_H

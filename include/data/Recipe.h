@@ -1,6 +1,10 @@
 /**
+ * @project Satisfactory_Planner
  * @file Recipe.h
- * Created by jackm on 9/19/2021
+ *
+ * @author Jackson Miller
+ * @date 2021-09-19
+ * @copyright (c) 2021 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_RECIPE_H
@@ -20,13 +24,14 @@ class Recipe {
   public:
     Recipe(const std::string &recipe_name, const DBMap &db);
 	
-	std::string name() const { return name_; };
-    std::string className() const { return class_name_; };
-	int time() const { return manufacturing_time_; };
-    bool isMachined() const { return is_machined_; };
-    bool isAlternate() const { return is_alternate_; };
-    std::vector<Item> ingredientList() const { return ingredients_; };
-    std::vector<Item> productList() const { return products_; };
+	[[nodiscard]] std::string name() const { return name_; };
+    [[nodiscard]] std::string className() const { return class_name_; };
+	[[nodiscard]] int time() const { return manufacturing_time_; };
+    [[nodiscard]] bool isMachined() const { return is_machined_; };
+    [[nodiscard]] bool isAlternate() const { return is_alternate_; };
+    [[nodiscard]] std::vector<Item> ingredientList() const { return ingredients_; };
+    [[nodiscard]] std::vector<Item> productList() const { return products_; };
+    [[nodiscard]] Building machine() const { return produced_in_.value(); };
 	
 	
   private:
@@ -39,7 +44,6 @@ class Recipe {
 
     bool is_machined_ = false;
     bool is_alternate_ = false;
-    // TODO: FICSMAS check
 
     // Constructor helpers
     static void GenerateItemList(const std::string &items_string, const DBMap &db, std::vector<Item> &target_list);

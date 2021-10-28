@@ -1,6 +1,12 @@
-//
-// Created by Jackson Miller on 9/13/21.
-//
+/**
+ * @project Satisfactory_Planner
+ * @file AboutDialog.cpp
+ *
+ * @author Jackson Miller
+ * @date 2021-09-13
+ * @copyright (c) 2021 Jackson Miller
+ */
+
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QLabel>
