@@ -28,6 +28,8 @@ class SubfactoryPane : public QWidget {
   public:
 	SubfactoryPane(std::shared_ptr<plan::Factory> factory, std::shared_ptr<data::Library> db, QWidget *parent = nullptr);
 
+    plan::Subfactory& selectedSubfactory();
+
   private:
 	struct Actions {
 		QAction* act_add = nullptr;

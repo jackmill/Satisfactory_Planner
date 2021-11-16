@@ -11,6 +11,12 @@
 
 namespace data {
 
+void to_json(nlohmann::json &json, const Item &item) {
+    json["class_name"] = item.class_name_;
+    json["amount"] = item.amount_.has_value() ? item.amount_.value() : 0;
+    json["rate"] = item.rate_.has_value() ? item.rate_.value() : 0;
+}
+
 /**
  * Constructor for an item with no amount
  * @param class_name
@@ -22,6 +28,7 @@ Item::Item(const std::string &class_name, const DBMap &db) :
     is_liquid_(findKey(class_name, "mStackSize", db) == "SS_FLUID") {
 
     amount_.reset();
+    rate_.reset();
 }
 
 /**
@@ -39,18 +46,23 @@ Item::Item(const std::string &class_name, const int &amount, const DBMap &db) :
         amount_.value() /= 1000;
     }
 
+    rate_.reset();
 }
 
 int Item::amount() const {
-	if (amount_.has_value()) {
-		return amount_.value();
-	} else {
-		return 0;
-	}
+	return amount_.has_value() ? amount_.value() : 0;
+}
+
+float Item::rate() const {
+    return rate_.has_value() ? rate_.value() : 0;
 }
 
 void Item::setAmount(const int &amount) {
 	amount_ = amount;
+}
+
+void Item::setRate(const float &rate) {
+    rate_ = rate;
 }
 
 }

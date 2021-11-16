@@ -21,6 +21,7 @@
 
 #include "subfactoryPane/SubfactoryPane.h"
 #include "mainTable/ProductionPane.h"
+
 #include "elements/ItemButton.h"
 #include "elements/ItemIcon.h"
 
@@ -30,40 +31,54 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
   public:
-    MainWindow(QWidget* parent = nullptr);
+    explicit MainWindow(QWidget* parent = nullptr);
 
   private:
-    struct Actions {
+    struct WindowActions {
         // File
+        QAction* act_file_new = nullptr;
+        QAction* act_file_save = nullptr;
+        QAction* act_file_save_as = nullptr;
+        QAction* act_file_open = nullptr;
 		QAction* act_data_source = nullptr;
         QAction* act_quit = nullptr;
 
         // Help
         QAction* act_help = nullptr;
     };
-	
-	Actions actions_;
+
+    static inline const auto kFileSuffix = "sfc";
+
+	WindowActions actions_;
+
+    struct SubfacPane {
+
+    };
+
+    // TODO: Don't use these; they're unneccesary and hiding signals that need extra bullshit to connect to each other
+    // Make these structs of what they contain
 	SubfactoryPane* subfactory_pane_ = nullptr;
     ProductionPane* production_pane_ = nullptr;
 	
 	QWidget* contents_ = nullptr;
 	QHBoxLayout* layout_ = nullptr;
 	QSplitter* splitter_ = nullptr;
- 
-    ItemButton* item_list_ = nullptr;
-    ItemIcon* test_icon_ = nullptr;
 
     std::shared_ptr<data::Library> db_;
     std::shared_ptr<plan::Factory> factory_;
 
     void InitActions();
     void InitMenu();
+    void InitUI();
 
-    void _TestItemList();
-//    void _TestListRecipes();
+    void SaveTo(const QString &path);
+    void OpenFrom(const QString &path);
 
   private Q_SLOTS:
-    // Actions
+    // WindowActions
+    void SFileSave();
+    void SFileSaveAs();
+    void SFileOpen();
 	void SDataSource();
     void SAbout();
 

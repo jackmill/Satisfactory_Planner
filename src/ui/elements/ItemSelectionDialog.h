@@ -26,9 +26,11 @@ class ItemSelectionDialog : public QDialog {
 	explicit ItemSelectionDialog(std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
 
     void setFromItem(const data::Item &item);
+    void setFromItem(const data::Item &item, float rate);
 
     data::Item getSelectedItem();
-    int getAmount() { return amount_->value(); }
+    int getAmount() { return amount_->value(); };
+    bool hasAmount() { return amount_->value() > 0; };
 	
   private:
     std::shared_ptr<data::Library> db_;
@@ -39,6 +41,9 @@ class ItemSelectionDialog : public QDialog {
 
 	QDialogButtonBox* actions_ = nullptr;
 	QVBoxLayout* layout_ = nullptr;
+
+  private slots:
+    void checkAmount();
 };
 
 } // namespace ui

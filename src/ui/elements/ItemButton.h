@@ -10,6 +10,8 @@
 #ifndef SATISFACTORY_PLANNER_ITEMBUTTON_H
 #define SATISFACTORY_PLANNER_ITEMBUTTON_H
 
+#include <QAction>
+
 #include "ItemIcon.h"
 
 namespace ui {
@@ -19,10 +21,21 @@ class ItemButton : public ItemIcon {
   public:
     ItemButton(data::Item &item, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
 
-    void selectItem(const data::Item &item);
+    void editItem(const data::Item &item);
+
+    struct Actions {
+        QAction* act_add_to_table = nullptr;
+        QAction* act_edit = nullptr;
+        QAction* act_delete = nullptr;
+    };
+
+    Actions actions_;
 
   private:
     std::shared_ptr<data::Library> db_;
+
+    void initMenu();
+
 
 };
 

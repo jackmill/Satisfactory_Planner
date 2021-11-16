@@ -40,22 +40,27 @@ void SubfactoryPane::InitToolbar() {
 	toolbar_ = new QToolBar(this);
     toolbar_->setIconSize(QSize(45, 45));
 	
-	// Actions
+	// WindowActions
     actions_.act_add = new QAction("+", this);
+    actions_.act_add->setToolTip(tr("Add New"));
 	toolbar_->addAction(actions_.act_add);
     connect(actions_.act_add, &QAction::triggered, this, &SubfactoryPane::SAddSubfactory);
 
     actions_.act_edit = new QAction("i", this);
+    actions_.act_edit->setToolTip(tr("Edit"));
 	toolbar_->addAction(actions_.act_edit);
     connect(actions_.act_edit, &QAction::triggered, this, &SubfactoryPane::SEditSubfactory);
 
     actions_.act_delete = new QAction("-", this);
+    actions_.act_delete->setToolTip(tr("Delete"));
 	toolbar_->addAction(actions_.act_delete);
     connect(actions_.act_delete, &QAction::triggered, this, &SubfactoryPane::SRemoveSubfactory);
-//    connect(actions_.act_delete, &QAction::triggered,
-//            this, []() ->void { Q_EMIT(&SubfactoryPane::SSubfactoryChanged); });
 
     layout_->addWidget(toolbar_);
+}
+
+plan::Subfactory& SubfactoryPane::selectedSubfactory() {
+    return subfactory_model_->getSubfactory(subfactory_list_->selectionModel()->currentIndex());
 }
 
 void SubfactoryPane::SAddSubfactory() {
@@ -66,7 +71,13 @@ void SubfactoryPane::SAddSubfactory() {
 
     auto* dialog = new SubfactoryEditDialog(subfactory, this);
     if (dialog->exec() == SubfactoryEditDialog::Accepted) {
-        factory_->subfactories_.at(row).setLabel(dialog->getName().toStdString());
+        QString subfactory_name = dialog->getName();
+        if (subfactory_name.isEmpty()) {
+            factory_->subfactories_.at(row).setLabel("untitled");
+        } else {
+            factory_->subfactories_.at(row).setLabel(dialog->getName().toStdString());
+        }
+
         factory_->subfactories_.at(row).setIcon(dialog->getIcon().toStdString());
     }
     dialog->deleteLater();
@@ -89,6 +100,11 @@ void SubfactoryPane::SEditSubfactory() {
 }
 
 void SubfactoryPane::SRemoveSubfactory() {
+    // Check that we're not removing the only subfactory
+    if (factory_->subfactories_.size() <= 1) {
+        return;
+    }
+
     const auto row = subfactory_list_->selectionModel()->currentIndex().row();
 
     const QString &subfac_name = subfactory_model_->data(

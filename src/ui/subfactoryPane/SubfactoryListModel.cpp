@@ -62,13 +62,17 @@ bool SubfactoryListModel::removeRows(int startRow, int count, const QModelIndex 
         return false;
     }
 
-    const int endRow = startRow + count - 1;
-    beginRemoveRows(parent, startRow, endRow);
+    const int end_row = startRow + count - 1;
+    beginRemoveRows(parent, startRow, end_row);
     factory_->subfactories_.erase(factory_->subfactories_.begin() + startRow,
-                                  factory_->subfactories_.begin() + (endRow + 1));
+                                  factory_->subfactories_.begin() + (end_row + 1));
     endRemoveRows();
 
     return true;
+}
+
+plan::Subfactory& SubfactoryListModel::getSubfactory(const QModelIndex &index) {
+    return factory_->subfactories_.at(index.row());
 }
 
 }

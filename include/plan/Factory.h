@@ -13,12 +13,19 @@
 #include <vector>
 
 #include "Subfactory.h"
+#include "nlohmann/json.hpp"
 
 namespace plan {
 
 class Factory {
+    friend std::ostream &operator<< (std::ostream &out, const Factory &factory);
+
   public:
     Factory() = default;
+
+    void save(const std::string &file_path) const;
+
+    void setSubfactories(std::vector<Subfactory> subfactories);
 
     std::vector<Subfactory> subfactories_;
 };

@@ -15,7 +15,16 @@ add_executable(${PROJECT_NAME}
         elements/ItemListModel.cpp
 
         mainTable/ProductionPane.cpp
-        mainTable/ProductionTable.cpp
+        mainTable/ProductionTableModel.cpp
+        mainTable/ProductLineEditDialog.cpp
+        mainTable/RecipeSelectModel.cpp
+        mainTable/ItemViewModel.cpp
+        mainTable/TargetModel.cpp
+        mainTable/TargetDelegate.cpp
+        mainTable/ByproductModel.cpp
+        mainTable/IngredientsModel.cpp
+        mainTable/ItemIconDelegate.cpp
+        mainTable/CheckboxDelegate.cpp
 
         subfactoryPane/SubfactoryPane.cpp
         subfactoryPane/SubfactoryInfo.cpp

@@ -40,7 +40,7 @@ DataSourceDialog::DataSourceDialog(QWidget *parent) :
     events_ = new QCheckBox(tr("Include Events (FICSMAS)"), this);
     events_->setChecked(Settings::GetIncludeEvents());
 	
-	// Button Actions
+	// Button WindowActions
 	actions_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 	actions_->button(QDialogButtonBox::Ok)->setEnabled(allowOk());
 	connect(actions_, &QDialogButtonBox::accepted, this, &DataSourceDialog::accept);

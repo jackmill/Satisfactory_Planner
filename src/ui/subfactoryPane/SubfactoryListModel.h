@@ -30,6 +30,8 @@ class SubfactoryListModel : public QAbstractListModel {
     bool insertRows(int startRow, int count, const QModelIndex &parent) final;
     bool removeRows(int startRow, int count, const QModelIndex &parent) final;
 
+    plan::Subfactory& getSubfactory(const QModelIndex &index);
+
   private:
     std::shared_ptr<plan::Factory> factory_;
 

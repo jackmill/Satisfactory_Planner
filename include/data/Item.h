@@ -20,6 +20,8 @@
 namespace data {
 
 class Item {
+    friend void to_json(nlohmann::json &json, const Item &item);
+
   public:
     Item(const std::string &class_name, const DBMap &db);
     Item(const std::string &class_name, const int &amount, const DBMap &db);
@@ -37,7 +39,9 @@ class Item {
 	void setName(const std::string &name) { name_ = name; };
 	
 	[[nodiscard]] int amount() const;
+    [[nodiscard]] float rate() const;
 	void setAmount(const int &amount);
+    void setRate(const float &rate);
     void clearAmount() { amount_.reset(); };
   
   private:
@@ -45,6 +49,7 @@ class Item {
     std::string class_name_;
     bool is_liquid_ = false;
 	std::optional<int> amount_;
+    std::optional<float> rate_;
 	
 };
 

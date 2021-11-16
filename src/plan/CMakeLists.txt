@@ -1,4 +1,5 @@
 add_library(plan
+        Factory.cpp
         Subfactory.cpp
         ProductLine.cpp)
 

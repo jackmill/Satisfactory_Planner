@@ -19,6 +19,8 @@
 namespace plan {
 
 class Subfactory {
+    friend void to_json(nlohmann::json &json, const Subfactory &subfactory);
+
   public:
 	Subfactory() = default;
     Subfactory(std::string label, std::string icon);
@@ -29,11 +31,17 @@ class Subfactory {
     void setLabel(std::string label) { label_ = std::move(label); };
     void setIcon(std::string icon_string) { icon_string_ = std::move(icon_string); };
 
-    void addProductLine(ProductLine product_line);
-    void addTarget(data::Item target_product);
+    void addProductLine(const ProductLine& product_line);
+    void addTarget(const data::Item& target_product);
+    float targetRemainder(const data::Item& target);
+
+    void updateByproducts();
+    void updateIngredients();
 
     std::vector<data::Item> product_targets_;
     std::vector<ProductLine> product_lines_;
+    std::vector<data::Item> byproducts_;
+    std::vector<data::Item> ingredients_;
 
   private:
     std::string label_;

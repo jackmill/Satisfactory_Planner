@@ -26,6 +26,8 @@ class Library {
 
     [[nodiscard]] Item findItem(const std::string &item_display_name) const { return items_.at(item_display_name); };
 
+    [[nodiscard]] const DBMap& getDBMap() const { return db_; };
+
     [[nodiscard]] std::vector<Recipe> FindRecipes(const Item &target_product) const;
     [[nodiscard]] std::vector<Recipe> FindRecipes(const std::string &target_display_name) const;
     [[nodiscard]] const std::vector<Item> &getItemsSorted() const { return items_sorted_; }

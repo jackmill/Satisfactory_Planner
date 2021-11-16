@@ -13,6 +13,8 @@
 #include <QFile>
 #include <QIcon>
 
+#include <cmath>
+
 namespace ui::util {
 
 inline QIcon itemIconFromDisplayName(const QString &display_name) {

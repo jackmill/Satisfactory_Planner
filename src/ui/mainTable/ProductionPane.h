@@ -14,8 +14,12 @@
 #include <QGridLayout>
 #include <QBoxLayout>
 #include <QGroupBox>
+#include <QTableView>
+#include <QAction>
 
-#include "ProductionTable.h"
+#include "ProductionTableModel.h"
+#include "TargetModel.h"
+#include "IngredientsModel.h"
 
 #include "plan/Factory.h"
 
@@ -26,31 +30,57 @@ class ProductionPane : public QWidget {
   public:
     ProductionPane(plan::Subfactory &subfactory, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
 
-
-
   private:
     plan::Subfactory& subfactory_;
     std::shared_ptr<data::Library> db_;
 
     QGroupBox* targets_widget_ = nullptr;
-    QHBoxLayout* targets_ = nullptr;
+    QVBoxLayout* targets_layout_ = nullptr;
+    QTableView* targets_ = nullptr;
+    TargetModel* targets_model_ = nullptr;
+
     QGroupBox* byproducts_widget_ = nullptr;
-    QHBoxLayout* byproducts_ = nullptr;
+    QVBoxLayout* byproducts_layout_ = nullptr;
+    QTableView* byproducts_ = nullptr;
+
     QGroupBox* ingredients_widget_ = nullptr;
-    QHBoxLayout* ingredients_ = nullptr;
-    QGroupBox* production_widget_ = nullptr;
-    ProductionTable* production_table_ = nullptr;
+    QVBoxLayout* ingredients_layout_ = nullptr;
+    QTableView* ingredients_ = nullptr;
+    IngredientsModel* ingredients_model_ = nullptr;
+
+    QTableView* production_table_ = nullptr;
+    ProductionTableModel* table_model_ = nullptr;
 
     QWidget* header_ = nullptr;
     QHBoxLayout* header_layout_ = nullptr;
     QVBoxLayout* layout_ = nullptr;
 
+    struct Actions {
+        // targets
+        QAction* target_act_new = nullptr;
+        QAction* target_act_add_to_table = nullptr;
+        QAction* target_act_del = nullptr;
+    };
+
+    Actions actions_;
+
+    void initTargets();
+    void initByproducts();
+    void initIngredients();
+    void initTable();
+    void initActions();
+
+    bool AddNewProductLineOk();
+
   private Q_SLOTS:
     void updateTable();
-    void updateTargets();
     void updateByproducts();
     void updateIngredients();
-    void addTarget();
+
+
+//    void updateTargets();
+//    void addTarget();
+//    void removeTarget(const data::Item &item);
 };
 
 }

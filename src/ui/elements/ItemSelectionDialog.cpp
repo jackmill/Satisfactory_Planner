@@ -30,6 +30,8 @@ ItemSelectionDialog::ItemSelectionDialog(std::shared_ptr<data::Library> db, QWid
     actions_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(actions_, &QDialogButtonBox::accepted, this, &ItemSelectionDialog::accept);
     connect(actions_, &QDialogButtonBox::rejected, this, &ItemSelectionDialog::reject);
+    checkAmount();
+    connect(amount_, &QSpinBox::textChanged, this, &ItemSelectionDialog::checkAmount);
 
     layout_->addWidget(item_);
     layout_->addWidget(amount_);
@@ -48,8 +50,24 @@ void ItemSelectionDialog::setFromItem(const data::Item &item) {
     amount_->setValue(item.amount());
 }
 
+void ItemSelectionDialog::setFromItem(const data::Item &item, float rate) {
+    int item_index;
+    for (auto db_item = db_->getItemsSorted().cbegin(); db_item != db_->getItemsSorted().cend(); ++db_item) {
+        if (item == *db_item) {
+            item_index = static_cast<int>(db_item - db_->getItemsSorted().cbegin());
+        }
+    }
+
+    item_->setCurrentIndex(item_index);
+    amount_->setValue(static_cast<int> (rate));
+}
+
 data::Item ItemSelectionDialog::getSelectedItem() {
     return model_->itemAtRow(item_->currentIndex());
+}
+
+void ItemSelectionDialog::checkAmount() {
+    actions_->button(QDialogButtonBox::Ok)->setEnabled(hasAmount());
 }
 
 }

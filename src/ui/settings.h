@@ -16,6 +16,7 @@ class Settings : public dragoonboots::qsettingscontainer::QSettingsContainer {
   public:
 	DGSETTINGS_SETTING(QString, JsonDataPath, "")
     DGSETTINGS_SETTING(bool, IncludeEvents, false)
+    DGSETTINGS_SETTING(QString, LastFileDialogPath, "")
 };
 
 #endif //SATISFACTORY_PLANNER_SETTINGS_H
