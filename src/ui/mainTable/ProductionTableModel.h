@@ -27,7 +27,7 @@ class ProductionTableModel : public QAbstractTableModel {
     [[nodiscard]] QVariant data(const QModelIndex &index, int role) const final;
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const final;
 
-    bool insertRows(int startRow, int count, const QModelIndex &parent, const data::Item &target);
+    bool insertRows(int startRow, int count, const QModelIndex &parent, data::Item &target);
     [[nodiscard]] data::Item getRowTarget(const QModelIndex &index) const;
 
     enum class Column {

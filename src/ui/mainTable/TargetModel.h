@@ -30,7 +30,7 @@ class TargetModel : public ItemViewModel {
     bool removeRows(int startRow, int count, const QModelIndex &parent) final;
     void editRow(const QModelIndex &index);
 
-    [[nodiscard]] data::Item getTarget(const QModelIndex &index) const;
+    [[nodiscard]] data::Item& getTarget(const QModelIndex &index) const;
 
   private:
     std::shared_ptr<data::Library> db_;

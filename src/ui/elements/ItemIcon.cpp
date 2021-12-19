@@ -25,7 +25,7 @@ ItemIcon::ItemIcon(data::Item &item, QWidget *parent) :
 	
 	// Layout
 	layout_ = new QVBoxLayout(this);
-	layout_->setMargin(button_size_->width() / 15);
+	layout_->setSpacing(button_size_->width() / 15);
 	layout_->addSpacerItem(new QSpacerItem(button_size_->width(), button_size_->height()));
 	
 	// Icon

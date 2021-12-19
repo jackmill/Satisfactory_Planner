@@ -102,7 +102,7 @@ void TargetModel::editRow(const QModelIndex &index) {
     dialog->deleteLater();
 }
 
-data::Item TargetModel::getTarget(const QModelIndex &index) const {
+data::Item& TargetModel::getTarget(const QModelIndex &index) const {
     return subfactory_.product_targets_.at(index.row());
 }
 

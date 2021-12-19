@@ -117,7 +117,7 @@ QVariant ProductionTableModel::headerData(int section, Qt::Orientation orientati
     return {};
 }
 
-bool ProductionTableModel::insertRows(int startRow, int count, const QModelIndex &parent, const data::Item &target) {
+bool ProductionTableModel::insertRows(int startRow, int count, const QModelIndex &parent, data::Item &target) {
     if (subfactory_.targetRemainder(target) <= 0) {
         return false;
     }

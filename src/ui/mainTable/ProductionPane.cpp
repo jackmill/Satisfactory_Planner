@@ -42,9 +42,9 @@ ProductionPane::ProductionPane(plan::Subfactory &subfactory, std::shared_ptr<dat
     layout_->addWidget(header_);
     layout_->addWidget(production_table_);
 
-    updateByproducts();
-    updateIngredients();
-    updateTable();
+    S_updateByproducts();
+    S_updateIngredients();
+    S_updateTable();
 }
 
 void ProductionPane::initActions() {
@@ -64,6 +64,12 @@ void ProductionPane::initActions() {
                                            1, QModelIndex(),
                                            targets_model_->getTarget(targets_->selectionModel()->currentIndex())); });
 
+    actions_.target_act_edit = new QAction(tr("Edit Target"), this);
+    connect(actions_.target_act_edit,
+            &QAction::triggered,
+            this,
+            [&] { targets_model_->editRow(targets_->selectionModel()->currentIndex()); });
+
     actions_.target_act_del = new QAction(tr("Remove Target"), this);
     connect(actions_.target_act_del,
             &QAction::triggered,
@@ -82,11 +88,12 @@ void ProductionPane::initTargets() {
 
     targets_->setContextMenuPolicy(Qt::ActionsContextMenu);
     targets_->addAction(actions_.target_act_add_to_table);
+    targets_->addAction(actions_.target_act_edit);
+    targets_->addAction(actions_.target_act_del);
     auto* target_spacer = new QAction(this);
     target_spacer->setSeparator(true);
     targets_->addAction(target_spacer);
     targets_->addAction(actions_.target_act_new);
-    targets_->addAction(actions_.target_act_del);
     // TODO: Enable/Disable add to table
 
 
@@ -139,18 +146,22 @@ void ProductionPane::initTable() {
                                                 target_product_delegate);
 }
 
-void ProductionPane::updateTable() {
+void ProductionPane::S_updateTable() {
 
 
 }
 
-void ProductionPane::updateByproducts() {
+void ProductionPane::S_updateByproducts() {
 
 }
 
-void ProductionPane::updateIngredients() {
+void ProductionPane::S_updateIngredients() {
 
 }
+
+//void ProductionPane::S_editSelectedTarget() {
+//
+//}
 
 bool ProductionPane::AddNewProductLineOk() {
     // If the currently selected target is NOT on the table

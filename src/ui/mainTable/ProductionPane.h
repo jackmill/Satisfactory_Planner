@@ -34,6 +34,7 @@ class ProductionPane : public QWidget {
     plan::Subfactory& subfactory_;
     std::shared_ptr<data::Library> db_;
 
+    // TODO: This is all way too complicated.  Use just one model for all tables, with a more global column enum to differentiate
     QGroupBox* targets_widget_ = nullptr;
     QVBoxLayout* targets_layout_ = nullptr;
     QTableView* targets_ = nullptr;
@@ -59,6 +60,7 @@ class ProductionPane : public QWidget {
         // targets
         QAction* target_act_new = nullptr;
         QAction* target_act_add_to_table = nullptr;
+        QAction* target_act_edit = nullptr;
         QAction* target_act_del = nullptr;
     };
 
@@ -73,9 +75,10 @@ class ProductionPane : public QWidget {
     bool AddNewProductLineOk();
 
   private Q_SLOTS:
-    void updateTable();
-    void updateByproducts();
-    void updateIngredients();
+    void S_updateTable();
+    void S_updateByproducts();
+    void S_updateIngredients();
+//    void S_editSelectedTarget();
 
 
 //    void updateTargets();

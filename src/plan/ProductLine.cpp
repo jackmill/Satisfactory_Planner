@@ -18,8 +18,8 @@ void to_json(nlohmann::json &json, const ProductLine &product_line) {
     json["recipe"] = product_line.recipe_.className();
 }
 
-ProductLine::ProductLine(const data::Item& target, const data::Recipe& recipe) :
-		target_(target),
+ProductLine::ProductLine(data::Item& target, const data::Recipe& recipe) :
+        target_(target),
         recipe_(recipe),
         multiplier_(1) {
     timing_coefficient_ = static_cast<float> (60.0 / recipe_.time());
@@ -28,13 +28,6 @@ ProductLine::ProductLine(const data::Item& target, const data::Recipe& recipe) :
 
 void ProductLine::changeRecipe(const data::Recipe &recipe) {
 	recipe_ = recipe;
-
-	// Match target count with recipe product count
-	for (const auto &product : recipe_.productList()) {
-		if (product == target_) {
-			target_.setAmount(product.amount());
-		}
-	}
 	
 	// Update the numbers
     timing_coefficient_ = static_cast<float> (60.0 / recipe_.time());
@@ -42,7 +35,14 @@ void ProductLine::changeRecipe(const data::Recipe &recipe) {
 }
 
 void ProductLine::updateMultiplier(const float &target_per_min) {
-	multiplier_ = target_per_min / (static_cast<float> (target_.amount()) * timing_coefficient_);
+	int target_recipe_amount;
+    for (const auto &product : recipe_.productList()) {
+        if (product == target_) {
+            target_recipe_amount = product.amount();
+        }
+    }
+
+    multiplier_ = target_per_min / (static_cast<float> (target_recipe_amount) * timing_coefficient_);
 }
 
 float ProductLine::calcPower() const {

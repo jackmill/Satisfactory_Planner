@@ -20,7 +20,7 @@ class ProductLine {
     friend void to_json(nlohmann::json &json, const ProductLine &product_line);
 
   public:
-	ProductLine(const data::Item& target,const data::Recipe& recipe);
+	ProductLine(data::Item& target, const data::Recipe& recipe);
 
     ProductLine& operator= (const ProductLine &rhs) { return *this; };
 
@@ -40,7 +40,7 @@ class ProductLine {
     [[nodiscard]] bool isDone() const { return complete_; };
 
   private:
-	data::Item target_;
+	data::Item& target_;
 	data::Recipe recipe_;
 	float multiplier_;
     float timing_coefficient_;
