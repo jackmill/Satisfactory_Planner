@@ -31,7 +31,7 @@ Recipe::Recipe(const std::string &recipe_name, const DBMap &db) :
 
     // Manufacture time
     std::string manufacture_time = recipe_json.at("mManufactoringDuration");
-    manufacturing_time_ = std::stoi(manufacture_time);
+    manufacturing_time_ = std::stof(manufacture_time);
 
     // Ingredients
     GenerateItemList(recipe_json.at("mIngredients"), db, ingredients_);

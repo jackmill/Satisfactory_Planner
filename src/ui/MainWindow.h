@@ -40,23 +40,19 @@ class MainWindow : public QMainWindow {
         QAction* act_file_save = nullptr;
         QAction* act_file_save_as = nullptr;
         QAction* act_file_open = nullptr;
+        QMenu*   menu_recent_files = nullptr;
 		QAction* act_data_source = nullptr;
         QAction* act_quit = nullptr;
 
         // Help
         QAction* act_help = nullptr;
+        QAction* act_help_about_qt = nullptr;
     };
 
-    static inline const auto kFileSuffix = "sfc";
+    static inline const auto kFileSuffix = "json";
 
 	WindowActions actions_;
 
-    struct SubfacPane {
-
-    };
-
-    // TODO: Don't use these; they're unneccesary and hiding signals that need extra bullshit to connect to each other
-    // Make these structs of what they contain
 	SubfactoryPane* subfactory_pane_ = nullptr;
     ProductionPane* production_pane_ = nullptr;
 	
@@ -71,19 +67,27 @@ class MainWindow : public QMainWindow {
     void InitMenu();
     void InitUI();
 
+    bool askAboutUnsavedData();
     void SaveTo(const QString &path);
     void OpenFrom(const QString &path);
+    void addToRecents(const QString& path);
+    void updateRecents();
+
+    void closeEvent(QCloseEvent* event) override;
 
   private Q_SLOTS:
     // WindowActions
-    void SFileSave();
-    void SFileSaveAs();
-    void SFileOpen();
-	void SDataSource();
-    void SAbout();
+    void S_fileNew();
+    void S_fileSave();
+    void S_fileSaveAs();
+    void S_fileOpen();
+	void S_dataSource();
+    void S_about();
+    void S_aboutQt();
 
     //
-    void SSubfactoryChanged();
+    void S_selectedSubfactoryChanged();
+    void S_factoryChanged();
 };
 
 } // namespace ui

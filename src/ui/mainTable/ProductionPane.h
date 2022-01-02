@@ -18,23 +18,25 @@
 #include <QAction>
 
 #include "ProductionTableModel.h"
+#include "SubfacItemListModel.h"
 #include "TargetModel.h"
-#include "IngredientsModel.h"
 
 #include "plan/Factory.h"
 
 namespace ui {
 
-class ProductionPane : public QWidget {
+class ProductionPane final : public QWidget {
     Q_OBJECT
   public:
-    ProductionPane(plan::Subfactory &subfactory, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+    ProductionPane(std::shared_ptr<plan::Subfactory> subfactory, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+
+
+    void resizeAll();
 
   private:
-    plan::Subfactory& subfactory_;
+    std::shared_ptr<plan::Subfactory> subfactory_;
     std::shared_ptr<data::Library> db_;
 
-    // TODO: This is all way too complicated.  Use just one model for all tables, with a more global column enum to differentiate
     QGroupBox* targets_widget_ = nullptr;
     QVBoxLayout* targets_layout_ = nullptr;
     QTableView* targets_ = nullptr;
@@ -43,11 +45,12 @@ class ProductionPane : public QWidget {
     QGroupBox* byproducts_widget_ = nullptr;
     QVBoxLayout* byproducts_layout_ = nullptr;
     QTableView* byproducts_ = nullptr;
+    SubfacItemListModel* byproducts_model_ = nullptr;
 
     QGroupBox* ingredients_widget_ = nullptr;
     QVBoxLayout* ingredients_layout_ = nullptr;
     QTableView* ingredients_ = nullptr;
-    IngredientsModel* ingredients_model_ = nullptr;
+    SubfacItemListModel* ingredients_model_ = nullptr;
 
     QTableView* production_table_ = nullptr;
     ProductionTableModel* table_model_ = nullptr;
@@ -62,6 +65,9 @@ class ProductionPane : public QWidget {
         QAction* target_act_add_to_table = nullptr;
         QAction* target_act_edit = nullptr;
         QAction* target_act_del = nullptr;
+
+        // ingredients
+        QAction* ingredient_act_add_to_table = nullptr;
     };
 
     Actions actions_;
@@ -72,18 +78,16 @@ class ProductionPane : public QWidget {
     void initTable();
     void initActions();
 
-    bool AddNewProductLineOk();
-
   private Q_SLOTS:
-    void S_updateTable();
-    void S_updateByproducts();
-    void S_updateIngredients();
-//    void S_editSelectedTarget();
+    void S_addNewTarget();
+    void S_editTarget(const QModelIndex &index);
+    void S_removeTarget(const QModelIndex& index);
+    void S_addToTable(std::shared_ptr<data::Item> target);
+	void S_refreshAll();
+	void S_targetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
-
-//    void updateTargets();
-//    void addTarget();
-//    void removeTarget(const data::Item &item);
+  Q_SIGNALS:
+    void S_factoryChanged();
 };
 
 }

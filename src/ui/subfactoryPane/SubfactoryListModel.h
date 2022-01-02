@@ -28,9 +28,10 @@ class SubfactoryListModel : public QAbstractListModel {
     [[nodiscard]] QVariant data(const QModelIndex &index, int role) const final;
 
     bool insertRows(int startRow, int count, const QModelIndex &parent) final;
+    bool insertRow(int startRow, const QModelIndex& parent, std::shared_ptr<plan::Subfactory> subfactory);
     bool removeRows(int startRow, int count, const QModelIndex &parent) final;
 
-    plan::Subfactory& getSubfactory(const QModelIndex &index);
+    std::shared_ptr<plan::Subfactory> getSubfactory(const QModelIndex &index);
 
   private:
     std::shared_ptr<plan::Factory> factory_;

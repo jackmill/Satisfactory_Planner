@@ -13,8 +13,10 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QFormLayout>
+#include <QComboBox>
 #include <QDialogButtonBox>
 
+#include "IconListModel.h"
 #include "plan/Subfactory.h"
 
 namespace ui {
@@ -24,11 +26,12 @@ class SubfactoryEditDialog : public QDialog {
     SubfactoryEditDialog(const plan::Subfactory &subfactory, QWidget* parent = nullptr);
 
     [[nodiscard]] QString getName() const { return name_->text(); };
-    [[nodiscard]] QString getIcon() const { return icon_->text(); };
+    [[nodiscard]] QString getIcon() const;
 
   private:
     QLineEdit* name_ = nullptr;
-    QLineEdit* icon_ = nullptr;
+    QComboBox* icon_ = nullptr;
+	IconListModel* icon_model_ = nullptr;
     QDialogButtonBox* actions_ = nullptr;
 
     QFormLayout* layout_ = nullptr;

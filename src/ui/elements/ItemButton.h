@@ -19,9 +19,9 @@ namespace ui {
 class ItemButton : public ItemIcon {
     Q_OBJECT
   public:
-    ItemButton(data::Item &item, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+    ItemButton(std::shared_ptr<data::Item> item, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
 
-    void editItem(const data::Item &item);
+    void editItem(const std::shared_ptr<data::Item>& item);
 
     struct Actions {
         QAction* act_add_to_table = nullptr;

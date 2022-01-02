@@ -3,8 +3,8 @@
  * @file ItemIconDelegate.h
  * 
  * @author Jackson Miller
- * @date 2021-11-08
- * @copyright (c) 2021 Jackson Miller
+ * @date 2022-01-01
+ * @copyright (c) 2022 Jackson Miller
  */
 
 #ifndef SATISFACTORY_PLANNER_ITEMICONDELEGATE_H
@@ -12,20 +12,21 @@
 
 #include <QStyledItemDelegate>
 
-#include "../elements/ItemIcon.h"
 #include "plan/Subfactory.h"
 
 namespace ui {
 
-class ItemIconDelegate : public QStyledItemDelegate {
-  Q_OBJECT
+class ItemIconDelegate final : public QStyledItemDelegate {
+	Q_OBJECT
   public:
-    explicit ItemIconDelegate(QObject* parent = nullptr) :
-        QStyledItemDelegate(parent) {};
+	explicit ItemIconDelegate(std::shared_ptr<plan::Subfactory> subfactory, QObject* parent = nullptr);
 
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
   private:
+	std::shared_ptr<plan::Subfactory> subfactory_;
+
 
 };
 

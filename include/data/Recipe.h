@@ -26,7 +26,7 @@ class Recipe {
 	
 	[[nodiscard]] std::string name() const { return name_; };
     [[nodiscard]] std::string className() const { return class_name_; };
-	[[nodiscard]] int time() const { return manufacturing_time_; };
+	[[nodiscard]] float time() const { return manufacturing_time_; };
     [[nodiscard]] bool isMachined() const { return is_machined_; };
     [[nodiscard]] bool isAlternate() const { return is_alternate_; };
     [[nodiscard]] std::vector<Item> ingredientList() const { return ingredients_; };
@@ -39,7 +39,7 @@ class Recipe {
     std::string name_;
 	std::vector<Item> ingredients_;
 	std::vector<Item> products_;
-	int manufacturing_time_;
+	float manufacturing_time_;
     std::optional<Building> produced_in_;
 
     bool is_machined_ = false;

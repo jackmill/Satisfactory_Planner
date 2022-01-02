@@ -14,96 +14,123 @@
 
 namespace ui {
 
-TargetModel::TargetModel(std::shared_ptr<data::Library> db, plan::Subfactory &subfactory, QObject *parent) :
-    db_(std::move(db)),
-    ItemViewModel(subfactory, parent) {
+TargetModel::TargetModel(std::shared_ptr<data::Library> db, std::shared_ptr<plan::Subfactory> subfactory, QObject *parent) :
+        db_(std::move(db)),
+        subfactory_(std::move(subfactory)),
+        QAbstractTableModel(parent) {
+    assert(subfactory_);
     assert(db_);
 }
 
-QVariant TargetModel::data(const QModelIndex &index, int role) const {
-    const auto target = subfactory_.product_targets_.at(index.row());
-    const auto column = static_cast<Column> (index.column());
+QVariant TargetModel::headerData(int section, Qt::Orientation orientation, int role) const {
+    if (role != Qt::ItemDataRole::DisplayRole || orientation != Qt::Horizontal) {
+        return {};
+    }
 
-    if (role == Qt::ItemDataRole::DisplayRole) {
-        if (column == Column::kItem) {
-            return QString::fromStdString(target.name());
-
-        } else if (column == Column::kRate) {
-            return QString::number(target.rate());
-
-        }
-
-    } else if (role == Qt::ItemDataRole::DecorationRole) {
-        if (column == Column::kItem) {
-            return util::itemIconFromDisplayName(QString::fromStdString(target.name()));
-
-        }
+    const auto column = static_cast<Column> (section);
+    switch (column) {
+        case Column::kItem :      return tr("Target");
+        case Column::kRate :      return tr("Rate");
     }
 
     return {};
 }
 
-bool TargetModel::insertRows(int startRow, int count, const QModelIndex &parent) {
-    beginInsertRows(parent, startRow, startRow + count - 1);
-//    subfactory_.product_targets_.reserve(subfactory_.product_targets_.size() + count);
+QVariant TargetModel::data(const QModelIndex &index, int role) const {
+    const auto target = subfactory_->targets_.at(index.row());
+    const auto column = static_cast<Column> (index.column());
 
-    for (int row = startRow; row < startRow + count; ++row) {
-        auto *dialog = new ItemSelectionDialog(db_);
-        if (dialog->exec() == QDialog::Accepted) {
-            data::Item new_target = dialog->getSelectedItem();
-            new_target.setRate(static_cast<float> (dialog->getAmount()));
+    if (role == Qt::ItemDataRole::DisplayRole) {
+        if (column == Column::kItem) {
+            return QString::fromStdString(target->name());
 
-            // Check that this isn't a duplicate target
-            // TODO: This still adds a blank row to the table.  Make it not do that.
-            bool duplicate = false;
-            for (auto &existing_item : subfactory_.product_targets_) {
-                if (new_target == existing_item) {
-                    existing_item.setRate(existing_item.rate() + new_target.rate());
-                    duplicate = true;
-                }
-            }
+        } else if (column == Column::kRate) {
+            return target->rate();
 
-            if (!duplicate) {
-                subfactory_.product_targets_.emplace(subfactory_.product_targets_.cbegin() + row,
-                                                     new_target);
-            }
         }
-        dialog->deleteLater();
-    }
+
+    } else if (role == Qt::ItemDataRole::DecorationRole) {
+        if (column == Column::kItem) {
+            return util::itemIconFromDisplayName(QString::fromStdString(target->name()));
+
+        }
+
+    } else if (role == Qt::ItemDataRole::ForegroundRole) {
+		if (!subfactory_->isTarget(target)) {
+			return QColor(Qt::darkGray);
+		} else if (subfactory_->targetRemainder(target) > 0) {
+			return QColor(Qt::yellow);
+		}
+
+	} else if (role == Qt::ItemDataRole::EditRole) {
+		if (column == Column::kRate) {
+			return target->rate();
+		}
+	}
+
+    return {};
+}
+
+bool TargetModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+	const auto column = static_cast<Column> (index.column());
+	const auto target = subfactory_->targets_.at(index.row());
+	bool success = false;
+
+	if (role == Qt::ItemDataRole::EditRole) {
+		const auto target_rate = value.value<float>();
+		if (column == Column::kRate) {
+			target->setRate(target_rate);
+			success = true;
+		}
+	}
+
+	if (success) {
+		Q_EMIT(dataChanged(index, index));
+	}
+
+	return success;
+}
+
+Qt::ItemFlags TargetModel::flags(const QModelIndex& index) const {
+	const auto column = static_cast<Column> (index.column());
+
+	if (column == Column::kRate) {
+		return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	} else {
+		return QAbstractTableModel::flags(index);
+	}
+}
+
+bool TargetModel::insertRows(int startRow, const QModelIndex &parent, const std::shared_ptr<data::Item>& new_target) {
+    beginInsertRows(parent, startRow, startRow);
+
+    subfactory_->targets_.push_back(new_target);
 
     endInsertRows();
     return true;
 }
 
 bool TargetModel::removeRows(int startRow, int count, const QModelIndex &parent) {
-    if (count == 0 || subfactory_.product_targets_.size() <= 1) {
+    if (count == 0 || subfactory_->targets_.size() <= 1) {
         return false;
     }
 
     const int endRow = startRow + count - 1;
     beginRemoveRows(parent, startRow, endRow);
-    subfactory_.product_targets_.erase(subfactory_.product_targets_.begin() + startRow,
-                                       subfactory_.product_targets_.begin() + (endRow + 1));
+    subfactory_->targets_.erase(subfactory_->targets_.begin() + startRow,
+                               subfactory_->targets_.begin() + (endRow + 1));
     endRemoveRows();
 
     return true;
 }
 
-void TargetModel::editRow(const QModelIndex &index) {
-    auto* dialog = new ItemSelectionDialog(db_);
-    dialog->setFromItem(subfactory_.product_targets_.at(index.row()),
-                        subfactory_.product_targets_.at(index.row()).rate());
-
-    if (dialog->exec() == QDialog::Accepted) {
-        subfactory_.product_targets_.at(index.row()) = dialog->getSelectedItem();
-        subfactory_.product_targets_.at(index.row()).setRate(static_cast<float> (dialog->getAmount()));
-    }
-
-    dialog->deleteLater();
+std::shared_ptr<data::Item> TargetModel::getTarget(const QModelIndex &index) const {
+    return subfactory_->targets_.at(index.row());
 }
 
-data::Item& TargetModel::getTarget(const QModelIndex &index) const {
-    return subfactory_.product_targets_.at(index.row());
+void TargetModel::refreshModel() {
+	beginResetModel();
+	endResetModel();
 }
 
 }

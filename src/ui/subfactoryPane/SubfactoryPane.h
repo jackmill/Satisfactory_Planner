@@ -28,7 +28,7 @@ class SubfactoryPane : public QWidget {
   public:
 	SubfactoryPane(std::shared_ptr<plan::Factory> factory, std::shared_ptr<data::Library> db, QWidget *parent = nullptr);
 
-    plan::Subfactory& selectedSubfactory();
+    std::shared_ptr<plan::Subfactory> selectedSubfactory();
 
   private:
 	struct Actions {
@@ -38,7 +38,7 @@ class SubfactoryPane : public QWidget {
 	};
 	
 	Actions actions_;
-	QToolBar* toolbar_;
+	QToolBar* toolbar_ = nullptr;
 
     std::shared_ptr<data::Library> db_;
     std::shared_ptr<plan::Factory> factory_;
@@ -51,12 +51,13 @@ class SubfactoryPane : public QWidget {
 	void InitToolbar();
 
   private Q_SLOTS:
-    void SAddSubfactory();
-    void SEditSubfactory();
-    void SRemoveSubfactory();
+    void S_AddSubfactory();
+    void S_EditSubfactory();
+    void S_RemoveSubfactory();
 
   Q_SIGNALS:
-    void SSubfactoryChanged();
+    void S_selectedSubfactoryChanged();
+    void S_factoryChanged();
 	
 };
 

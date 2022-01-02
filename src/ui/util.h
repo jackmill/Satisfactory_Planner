@@ -18,10 +18,9 @@
 namespace ui::util {
 
 inline QIcon itemIconFromDisplayName(const QString &display_name) {
-    QString icon_string = display_name;
-    icon_string.replace(' ', '_');
-    icon_string.prepend(":/icon/");
-    icon_string.append(".png");
+    QString display_formatted = display_name;
+	display_formatted.replace(' ', '_');
+	auto icon_string = QString(":/icon/%1.png").arg(display_formatted);
 
     if (QFile(icon_string).exists()) {
         return QIcon(icon_string);
@@ -30,7 +29,7 @@ inline QIcon itemIconFromDisplayName(const QString &display_name) {
     }
 }
 
-inline QString formatItemNumber(const int &num) {
+inline QString formatItemNumber(const int& num) {
     QString item_count_formatted;
     if (num > 9999) {
         item_count_formatted = QString::number(num / 1000) + '.';

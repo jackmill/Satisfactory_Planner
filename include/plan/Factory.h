@@ -19,15 +19,21 @@ namespace plan {
 
 class Factory {
     friend std::ostream &operator<< (std::ostream &out, const Factory &factory);
+    friend std::istream &operator>> (std::istream& in, Factory& factory);
 
   public:
     Factory() = default;
+    explicit Factory(const std::string& file_path, const data::DBMap& db);
 
     void save(const std::string &file_path) const;
 
-    void setSubfactories(std::vector<Subfactory> subfactories);
+    void setSubfactories(std::vector<std::shared_ptr<Subfactory>> subfactories);
 
-    std::vector<Subfactory> subfactories_;
+    std::vector<std::shared_ptr<Subfactory>> subfactories_;
+
+  private:
+    // Used only for generation from json files
+    std::optional<data::DBMap> db_;
 };
 
 } // namespace plan

@@ -24,10 +24,14 @@ SubfactoryEditDialog::SubfactoryEditDialog(const plan::Subfactory &subfactory, Q
         name_->setText(QString::fromStdString(subfactory.label()));
     }
 
-    icon_ = new QLineEdit(this);
-    if (!subfactory.icon().empty()) {
-        icon_->setText(QString::fromStdString(subfactory.icon()));
-    }
+    icon_ = new QComboBox(this);
+	icon_model_ = new IconListModel(this);
+    icon_->setModel(icon_model_);
+	icon_->setIconSize(QSize(40, 40));
+	if (!subfactory.icon().empty()) {
+		QString icon_filename = QString::fromStdString(subfactory.icon());
+		icon_->setCurrentIndex(icon_model_->findIconIndex(icon_filename));
+	}
 
     actions_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(actions_, &QDialogButtonBox::accepted, this, &SubfactoryEditDialog::accept);
@@ -37,5 +41,10 @@ SubfactoryEditDialog::SubfactoryEditDialog(const plan::Subfactory &subfactory, Q
     layout_->addRow(tr("Icon: "), icon_);
     layout_->addWidget(actions_);
 }
+
+QString SubfactoryEditDialog::getIcon() const {
+	return icon_model_->getIconString(icon_->currentIndex());
+}
+
 
 }

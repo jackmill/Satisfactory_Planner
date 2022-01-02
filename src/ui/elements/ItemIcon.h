@@ -22,18 +22,20 @@ namespace ui {
 class ItemIcon : public QPushButton {
   
   public:
-	explicit ItemIcon(data::Item &item, QWidget* parent = nullptr);
+	explicit ItemIcon(std::shared_ptr<data::Item> item, QWidget* parent = nullptr);
 
-	void updateItemCount(const int &count);
-    void setLabelCount(const int count);
+	void updateItemCount(const float& count);
+    void setLabelCount(float count);
     void setCleared();
+
+	constexpr static const QSize kSize_ = QSize(45, 45);
 	
   private:
 	QVBoxLayout* layout_ = nullptr;
 	QLabel* item_count_label_ = nullptr;
 
   protected:
-	data::Item& btn_item_;
+	std::shared_ptr<data::Item> btn_item_;
 };
 
 } // namespace ui

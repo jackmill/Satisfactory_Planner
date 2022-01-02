@@ -42,6 +42,8 @@ class Item {
 	void setAmount(const int &amount);
     void setRate(const float &rate);
     void clearAmount() { amount_.reset(); };
+
+    void replaceWith(const data::Item& rhs);
   
   private:
 	std::string name_;
@@ -49,7 +51,7 @@ class Item {
     bool is_liquid_ = false;
 	std::optional<int> amount_;
     std::optional<float> rate_;
-	
+
 };
 
 } // namespace data

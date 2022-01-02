@@ -14,7 +14,19 @@ namespace plan {
 void to_json(nlohmann::json &json, const Subfactory &subfactory) {
     json["name"] = subfactory.label_;
     json["icon"] = subfactory.icon_string_;
-    json["targets"] = subfactory.product_targets_;
+
+    for (auto target = subfactory.targets_.cbegin(); target != subfactory.targets_.cend(); ++target) {
+        json["targets"][target - subfactory.targets_.cbegin()] = **target;
+    }
+
+    for (auto byproduct = subfactory.byproducts_.cbegin(); byproduct != subfactory.byproducts_.cend(); ++byproduct) {
+        json["byproducts"][byproduct - subfactory.byproducts_.cbegin()] = **byproduct;
+    }
+
+    for (auto ingredient = subfactory.ingredients_.cbegin(); ingredient != subfactory.ingredients_.cend(); ++ingredient) {
+        json["ingredients"][ingredient - subfactory.ingredients_.cbegin()] = **ingredient;
+    }
+
     json["product_lines"] = subfactory.product_lines_;
 }
 
@@ -27,19 +39,79 @@ void Subfactory::addProductLine(const ProductLine& product_line) {
     product_lines_.emplace_back(product_line);
 }
 
-void Subfactory::addTarget(const data::Item& target_product) {
-    product_targets_.emplace_back(target_product);
+void Subfactory::addTarget(const std::shared_ptr<data::Item> &target_product) {
+    targets_.emplace_back(target_product);
 }
 
-float Subfactory::targetRemainder(const data::Item &target) {
-    float target_rate = target.rate();
+float Subfactory::targetRemainder(const std::shared_ptr<data::Item>& target) const {
+    float target_rate = target->rate();
     for (const auto &product : product_lines_) {
         if (product.target() == target) {
-            target_rate -= product.targetOutput();
+            target_rate -= product.productOutput();
         }
     }
     return target_rate;
 }
+
+bool Subfactory::isTarget(const std::shared_ptr<data::Item>& item) const {
+    return std::any_of(product_lines_.cbegin(), product_lines_.cend(),
+                       [item] (const plan::ProductLine& line){ return line.target() == item; });
+}
+
+std::vector<std::shared_ptr<data::Item>> Subfactory::ingredientsNotOnTable() const {
+    std::vector<std::shared_ptr<data::Item>> out;
+
+    for (const auto& ingredient : ingredients_) {
+        // TODO: Allow separation of ingredient-targeted product lines
+		if (!isTarget(ingredient)/* || targetRemainder(ingredient) > 0*/) {
+            out.push_back(ingredient);
+        }
+    }
+
+    return out;
+}
+
+void Subfactory::updateIngredients() {
+    // Zero out existing ingredients
+    for (const auto& ingredient : ingredients_) {
+        ingredient->setRate(0);
+    }
+
+    // Tally ingredients
+    for (const auto& line : product_lines_) {
+        for (const auto& line_ingredient : line.ingredients()) {
+
+            if (!ingredients_.empty()) {
+                bool exists = false;
+                for (auto& ingredient : ingredients_) {
+
+                    if (line_ingredient == *ingredient) {
+                        exists = true;
+                        ingredient->setRate(ingredient->rate() + line_ingredient.rate());
+                    }
+
+                }
+
+                if (!exists) {
+                    ingredients_.push_back(std::make_shared<data::Item>(line_ingredient));
+                }
+
+            } else {
+                ingredients_.push_back(std::make_shared<data::Item>(line_ingredient));
+            }
+
+        }
+    }
+
+    // Find and remove existing ingredients that are not in the table
+    // If the item's rate is 0, nothing added to it in the previous for loop, so it's not on the table
+    for (auto ingredient = ingredients_.cbegin(); ingredient != ingredients_.cend(); ++ingredient) {
+        if ((*ingredient)->rate() <= 0) {
+            ingredients_.erase(ingredient);
+        }
+    }
+}
+
 
 void Subfactory::updateByproducts() {
     byproducts_.clear();
@@ -48,7 +120,7 @@ void Subfactory::updateByproducts() {
     std::vector<data::Item> all_byproducts;
     for (const auto &line : product_lines_) {
         for (const auto &line_prod : line.calcProducts()) {
-            if (line_prod != line.target()) {
+            if (line_prod != *line.target()) {
                 if (all_byproducts.empty()) {
                     all_byproducts.emplace_back(line_prod);
                 } else {
@@ -68,7 +140,7 @@ void Subfactory::updateByproducts() {
     }
 
 }
-
+/*
 void Subfactory::updateIngredients() {
     ingredients_.clear();
     byproducts_.clear();
@@ -136,7 +208,37 @@ void Subfactory::updateIngredients() {
         }
     }
 
-    ingredients_ = consumed_items;
+    for (const auto& consumed : consumed_items) {
+        ingredients_.push_back(std::make_shared<data::Item>(consumed));
+    }
+}
+*/
+
+void Subfactory::calculate() {
+    for (auto& line : product_lines_) {
+        line.calculate();
+    }
+    updateIngredients();
+    updateByproducts();
+
+
+    do {
+        validate();
+        for (auto& line: product_lines_) {
+            if (!line.isValid()) {
+                line.update();
+                updateIngredients();
+                updateByproducts();
+            }
+        }
+    } while (std::any_of(product_lines_.cbegin(), product_lines_.cend(),
+                        [](const plan::ProductLine& table_line){ return !table_line.isValid(); }));
+}
+
+void Subfactory::validate() {
+    for (auto& product_line : product_lines_) {
+        product_line.validate();
+    }
 }
 
 }

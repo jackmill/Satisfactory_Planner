@@ -24,26 +24,28 @@ namespace ui {
 class ItemSelectionDialog : public QDialog {
   public:
 	explicit ItemSelectionDialog(std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+    ItemSelectionDialog(const data::Item& item, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
 
     void setFromItem(const data::Item &item);
     void setFromItem(const data::Item &item, float rate);
 
     data::Item getSelectedItem();
-    int getAmount() { return amount_->value(); };
-    bool hasAmount() { return amount_->value() > 0; };
-	
+    int getDialogRate() { return dialog_rate_->value(); };
+    bool hasRate() { return dialog_rate_->value() > 0; };
+	void allowItemChange(bool allow_item_change);
+
   private:
     std::shared_ptr<data::Library> db_;
     ItemListModel* model_ = nullptr;
 
-    QComboBox* item_ = nullptr;
-    QSpinBox* amount_ = nullptr;
+    QComboBox* dialog_item_ = nullptr;
+    QSpinBox* dialog_rate_ = nullptr;
 
 	QDialogButtonBox* actions_ = nullptr;
 	QVBoxLayout* layout_ = nullptr;
 
   private slots:
-    void checkAmount();
+    void checkDialogRate();
 };
 
 } // namespace ui

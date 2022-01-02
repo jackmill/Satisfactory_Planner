@@ -24,23 +24,23 @@ bool SubfactoryListModel::updateSubfactory(int row, const plan::Subfactory &subf
         return false;
     }
 
-    factory_->subfactories_[row].setLabel(subfactory.label());
-    factory_->subfactories_[row].setIcon(subfactory.icon());
+    factory_->subfactories_.at(row)->setLabel(subfactory.label());
+    factory_->subfactories_.at(row)->setIcon(subfactory.icon());
     Q_EMIT(dataChanged(createIndex(row, 0), createIndex(row, 0)));
     return true;
 }
 
 int SubfactoryListModel::rowCount(const QModelIndex &parent) const {
-    return factory_->subfactories_.size();
+    return static_cast<int>(factory_->subfactories_.size());
 }
 
 QVariant SubfactoryListModel::data(const QModelIndex &index, int role) const {
-    const auto subfac = factory_->subfactories_.at(index.row());
+    const auto subfactory = factory_->subfactories_.at(index.row());
 
     if (role == Qt::ItemDataRole::DisplayRole) {
-        return QString::fromStdString(subfac.label());
+        return QString::fromStdString(subfactory->label());
     } else if (role == Qt::ItemDataRole::DecorationRole) {
-        return QIcon(QString::fromStdString(subfac.icon()));
+        return QIcon(QString(":/icon/%1").arg(QString::fromStdString(subfactory->icon())));
     }
 
     return {};
@@ -52,6 +52,15 @@ bool SubfactoryListModel::insertRows(int startRow, int count, const QModelIndex 
     for (int row = startRow; row < startRow + count; ++row) {
         factory_->subfactories_.emplace(factory_->subfactories_.cbegin() + row);
     }
+    endInsertRows();
+
+    return true;
+}
+
+bool SubfactoryListModel::insertRow(int startRow, const QModelIndex& parent,
+                                    std::shared_ptr<plan::Subfactory> subfactory) {
+    beginInsertRows(parent, startRow, startRow);
+    factory_->subfactories_.push_back(std::move(subfactory));
     endInsertRows();
 
     return true;
@@ -71,7 +80,7 @@ bool SubfactoryListModel::removeRows(int startRow, int count, const QModelIndex 
     return true;
 }
 
-plan::Subfactory& SubfactoryListModel::getSubfactory(const QModelIndex &index) {
+std::shared_ptr<plan::Subfactory> SubfactoryListModel::getSubfactory(const QModelIndex &index) {
     return factory_->subfactories_.at(index.row());
 }
 

@@ -1,6 +1,6 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 add_executable(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/resources/resources.qrc
@@ -18,18 +18,16 @@ add_executable(${PROJECT_NAME}
         mainTable/ProductionTableModel.cpp
         mainTable/ProductLineEditDialog.cpp
         mainTable/RecipeSelectModel.cpp
-        mainTable/ItemViewModel.cpp
+        mainTable/SubfacItemListModel.cpp
         mainTable/TargetModel.cpp
-        mainTable/TargetDelegate.cpp
-        mainTable/ByproductModel.cpp
-        mainTable/IngredientsModel.cpp
+        mainTable/SpinBoxDelegate.cpp
         mainTable/ItemIconDelegate.cpp
-        mainTable/CheckboxDelegate.cpp
 
         subfactoryPane/SubfactoryPane.cpp
         subfactoryPane/SubfactoryInfo.cpp
         subfactoryPane/SubfactoryListModel.cpp
         subfactoryPane/SubfactoryEditDialog.cpp
+        subfactoryPane/IconListModel.cpp
 
         samples/TestButton.cpp
 
@@ -45,5 +43,5 @@ FetchContent_MakeAvailable(QSettingsContainer)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
         plan
-        Qt6::Widgets
+        Qt5::Widgets
         QSettingsContainer)

@@ -14,7 +14,7 @@
 
 int main() {
     std::cout << "Starting..." << std::endl;
-    data::Library library = data::Library("resources/Docs.json");
+    data::Library library = data::Library("resources/Docs.json", true);
     std::cout << "Done" << std::endl;
 
     return 0;

@@ -28,15 +28,25 @@ class RecipeSelectModel : public QAbstractTableModel {
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const final;
     [[nodiscard]] QVariant data(const QModelIndex &index, int role) const final;
 
+	enum class Column {
+		kName = 0,
+		kIngredient1,
+		kIngredient2,
+		kIngredient3,
+		kIngredient4,
+		kTime,
+		kBuilding,
+		kProduct1,
+		kProduct2
+	};
+
+	static const int column_count = static_cast<int>(Column::kProduct2) + 1;
+
   private:
     std::vector<data::Recipe> recipes_;
 
-    enum class Column {
-        kName = 0,
-        kIngredients,
-        kBuilding,
-        kProducts
-    };
+    [[nodiscard]] static QVariant ingredientData(int col_index, const data::Recipe &recipe);
+    [[nodiscard]] static QIcon ingredientIcon(int col_index, const data::Recipe& recipe);
 
 };
 

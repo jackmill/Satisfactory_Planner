@@ -14,9 +14,20 @@
 
 class Settings : public dragoonboots::qsettingscontainer::QSettingsContainer {
   public:
+    /** Path to docs.json data source */
 	DGSETTINGS_SETTING(QString, JsonDataPath, "")
+
+    /** Include items and recipes from events like FICSMAS */
     DGSETTINGS_SETTING(bool, IncludeEvents, false)
+
+    /** Last path opened in a file dialog */
     DGSETTINGS_SETTING(QString, LastFileDialogPath, "")
+
+    /** Recently opened files */
+    DGSETTINGS_SETTING(QStringList, RecentFiles, {})
+
+    /** Number of recent files */
+    DGSETTINGS_SETTING(int, RecentFilesCount, 4)
 };
 
 #endif //SATISFACTORY_PLANNER_SETTINGS_H

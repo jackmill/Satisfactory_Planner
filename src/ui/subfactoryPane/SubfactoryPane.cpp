@@ -25,15 +25,22 @@ SubfactoryPane::SubfactoryPane(std::shared_ptr<plan::Factory> factory, std::shar
     subfactory_list_ = new QListView(this);
     subfactory_model_ = new SubfactoryListModel(factory_, this);
     subfactory_list_->setModel(subfactory_model_);
+
     connect(subfactory_list_->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &SubfactoryPane::SSubfactoryChanged);
+            this, &SubfactoryPane::S_selectedSubfactoryChanged);
 
     layout_->addWidget(subfactory_list_);
 
     if (factory_->subfactories_.empty()) {
-        SAddSubfactory();
+        plan::Subfactory new_subfactory("untitled", "");
+
+        subfactory_model_->insertRow(subfactory_model_->rowCount(QModelIndex()), QModelIndex(),
+                                     std::make_shared<plan::Subfactory>(new_subfactory));
     }
 
+    connect(subfactory_model_, &SubfactoryListModel::dataChanged, this, &SubfactoryPane::S_factoryChanged);
+    connect(subfactory_model_, &SubfactoryListModel::rowsInserted, this, &SubfactoryPane::S_factoryChanged);
+    connect(subfactory_model_, &SubfactoryListModel::rowsRemoved, this, &SubfactoryPane::S_factoryChanged);
 }
 
 void SubfactoryPane::InitToolbar() {
@@ -44,62 +51,62 @@ void SubfactoryPane::InitToolbar() {
     actions_.act_add = new QAction("+", this);
     actions_.act_add->setToolTip(tr("Add New"));
 	toolbar_->addAction(actions_.act_add);
-    connect(actions_.act_add, &QAction::triggered, this, &SubfactoryPane::SAddSubfactory);
+    connect(actions_.act_add, &QAction::triggered, this, &SubfactoryPane::S_AddSubfactory);
 
     actions_.act_edit = new QAction("i", this);
     actions_.act_edit->setToolTip(tr("Edit"));
 	toolbar_->addAction(actions_.act_edit);
-    connect(actions_.act_edit, &QAction::triggered, this, &SubfactoryPane::SEditSubfactory);
+    connect(actions_.act_edit, &QAction::triggered, this, &SubfactoryPane::S_EditSubfactory);
 
     actions_.act_delete = new QAction("-", this);
     actions_.act_delete->setToolTip(tr("Delete"));
 	toolbar_->addAction(actions_.act_delete);
-    connect(actions_.act_delete, &QAction::triggered, this, &SubfactoryPane::SRemoveSubfactory);
+    connect(actions_.act_delete, &QAction::triggered, this, &SubfactoryPane::S_RemoveSubfactory);
 
     layout_->addWidget(toolbar_);
 }
 
-plan::Subfactory& SubfactoryPane::selectedSubfactory() {
+std::shared_ptr<plan::Subfactory> SubfactoryPane::selectedSubfactory() {
     return subfactory_model_->getSubfactory(subfactory_list_->selectionModel()->currentIndex());
 }
 
-void SubfactoryPane::SAddSubfactory() {
-    subfactory_model_->insertRows(subfactory_model_->rowCount(QModelIndex()), 1, QModelIndex());
+void SubfactoryPane::S_AddSubfactory() {
+    auto new_subfactory = plan::Subfactory();
 
-    const unsigned int row = subfactory_model_->rowCount(QModelIndex()) - 1;
-    const plan::Subfactory &subfactory = factory_->subfactories_.at(row);
-
-    auto* dialog = new SubfactoryEditDialog(subfactory, this);
+    auto* dialog = new SubfactoryEditDialog(new_subfactory, this);
     if (dialog->exec() == SubfactoryEditDialog::Accepted) {
         QString subfactory_name = dialog->getName();
         if (subfactory_name.isEmpty()) {
-            factory_->subfactories_.at(row).setLabel("untitled");
+            new_subfactory.setLabel("untitled");
         } else {
-            factory_->subfactories_.at(row).setLabel(dialog->getName().toStdString());
+            new_subfactory.setLabel(dialog->getName().toStdString());
         }
 
-        factory_->subfactories_.at(row).setIcon(dialog->getIcon().toStdString());
+        new_subfactory.setIcon(dialog->getIcon().toStdString());
+
+        subfactory_model_->insertRow(subfactory_model_->rowCount(QModelIndex()), QModelIndex(),
+                                     std::make_shared<plan::Subfactory>(new_subfactory));
     }
     dialog->deleteLater();
 }
 
-void SubfactoryPane::SEditSubfactory() {
+void SubfactoryPane::S_EditSubfactory() {
     const QModelIndex selection = subfactory_list_->selectionModel()->currentIndex();
     if (!selection.isValid()) {
         return;
     }
     const unsigned int row = selection.row();
-    const plan::Subfactory &subfactory = factory_->subfactories_.at(row);
+    std::shared_ptr<plan::Subfactory> subfactory = factory_->subfactories_.at(row);
 
-    auto* dialog = new SubfactoryEditDialog(subfactory, this);
+    auto* dialog = new SubfactoryEditDialog(*subfactory, this);
     if (dialog->exec() == SubfactoryEditDialog::Accepted) {
-        factory_->subfactories_.at(row).setLabel(dialog->getName().toStdString());
-        factory_->subfactories_.at(row).setIcon(dialog->getIcon().toStdString());
+        subfactory->setLabel(dialog->getName().toStdString());
+        subfactory->setIcon(dialog->getIcon().toStdString());
     }
     dialog->deleteLater();
 }
 
-void SubfactoryPane::SRemoveSubfactory() {
+void SubfactoryPane::S_RemoveSubfactory() {
     // Check that we're not removing the only subfactory
     if (factory_->subfactories_.size() <= 1) {
         return;
@@ -107,12 +114,12 @@ void SubfactoryPane::SRemoveSubfactory() {
 
     const auto row = subfactory_list_->selectionModel()->currentIndex().row();
 
-    const QString &subfac_name = subfactory_model_->data(
+    const QString &subfactory_name = subfactory_model_->data(
             subfactory_list_->selectionModel()->currentIndex(),
             Qt::DisplayRole
             ).toString();
 
-    QString delete_message = tr("Are you sure you want to delete the subfactory '%1'?").arg(subfac_name);
+    QString delete_message = tr("Are you sure you want to delete the subfactory '%1'?").arg(subfactory_name);
 
     const auto confirm_delete = QMessageBox::question(this, tr("Delete Subfactory"), delete_message);
     if (confirm_delete == QMessageBox::Yes) {

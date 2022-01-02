@@ -37,6 +37,7 @@ class ProductLineEditDialog : public QDialog {
 
     QVBoxLayout* layout_ = nullptr;
 
+	[[nodiscard]] int tableWidth() const;
 };
 
 }

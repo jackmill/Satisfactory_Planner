@@ -15,9 +15,9 @@
 
 namespace ui {
 
-ItemButton::ItemButton(data::Item &item, std::shared_ptr<data::Library> db, QWidget *parent) :
+ItemButton::ItemButton(std::shared_ptr<data::Item> item, std::shared_ptr<data::Library> db, QWidget *parent) :
     db_(std::move(db)),
-    ItemIcon(item, parent) {
+    ItemIcon(std::move(item), parent) {
 
     initMenu();
 }
@@ -43,14 +43,14 @@ void ItemButton::initMenu() {
     setMenu(menu);
 }
 
-void ItemButton::editItem(const data::Item &item) {
+void ItemButton::editItem(const std::shared_ptr<data::Item>& item) {
     auto* dialog = new ItemSelectionDialog(db_, this);
-    dialog->setFromItem(item);
+    dialog->setFromItem(*item);
 
     if (dialog->exec() == QDialog::Accepted) {
-        btn_item_ = dialog->getSelectedItem();
-        updateItemCount(dialog->getAmount());
-        setIcon(util::itemIconFromDisplayName(QString::fromStdString(btn_item_.name())));
+        btn_item_->replaceWith(dialog->getSelectedItem());
+        updateItemCount(dialog->getDialogRate());
+        setIcon(util::itemIconFromDisplayName(QString::fromStdString(btn_item_->name())));
     }
     dialog->deleteLater();
 }

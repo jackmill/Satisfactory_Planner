@@ -33,22 +33,27 @@ class Subfactory {
     void setIcon(std::string icon_string) { icon_string_ = std::move(icon_string); };
 
     void addProductLine(const ProductLine& product_line);
-    void addTarget(const data::Item& target_product);
-    float targetRemainder(const data::Item& target);
+    void addTarget(const std::shared_ptr<data::Item> &target_product);
+    [[nodiscard]] float targetRemainder(const std::shared_ptr<data::Item>& target) const;
+    [[nodiscard]] float powerDraw() const { return power_draw_; };
+    [[nodiscard]] bool isTarget(const std::shared_ptr<data::Item>& item) const;
+    [[nodiscard]] std::vector<std::shared_ptr<data::Item>> ingredientsNotOnTable() const;
 
     void updateByproducts();
     void updateIngredients();
+    void calculate();
+    void validate();
 
-    std::vector<data::Item> product_targets_;
+    std::vector<std::shared_ptr<data::Item>> targets_;
+    std::vector<std::shared_ptr<data::Item>> byproducts_;
+    std::vector<std::shared_ptr<data::Item>> ingredients_;
     std::vector<ProductLine> product_lines_;
-    std::vector<data::Item> byproducts_;
-    std::vector<data::Item> ingredients_;
 
   private:
     std::string label_;
     std::string icon_string_;
 
-
+    float power_draw_ = 0.0;
 };
 
 } // namespace plan

@@ -13,8 +13,8 @@ namespace data {
 
 void to_json(nlohmann::json &json, const Item &item) {
     json["class_name"] = item.class_name_;
-    json["amount"] = item.amount_.has_value() ? item.amount_.value() : 0;
-    json["rate"] = item.rate_.has_value() ? item.rate_.value() : 0;
+    json["amount"] = item.amount_.value_or(0);
+    json["rate"] = item.rate_.value_or(0);
 }
 
 /**
@@ -50,11 +50,11 @@ Item::Item(const std::string &class_name, const int &amount, const DBMap &db) :
 }
 
 int Item::amount() const {
-	return amount_.has_value() ? amount_.value() : 0;
+	return amount_.value_or(0);
 }
 
 float Item::rate() const {
-    return rate_.has_value() ? rate_.value() : 0;
+    return rate_.value_or(0);
 }
 
 void Item::setAmount(const int &amount) {
@@ -63,6 +63,14 @@ void Item::setAmount(const int &amount) {
 
 void Item::setRate(const float &rate) {
     rate_ = rate;
+}
+
+void Item::replaceWith(const Item &rhs) {
+    name_ = rhs.name_;
+    class_name_ = rhs.class_name_;
+    is_liquid_ = rhs.is_liquid_;
+    amount_ = rhs.amount_;
+    rate_ = rhs.rate_;
 }
 
 }
