@@ -15,7 +15,7 @@
 
 namespace ui {
 
-ItemIconDelegate::ItemIconDelegate(std::shared_ptr<plan::Subfactory> subfactory, QObject* parent) :
+ItemIconDelegate::ItemIconDelegate(std::shared_ptr<plan::Subfactory> subfactory, QWidget* parent) :
 	subfactory_(std::move(subfactory)),
 	QStyledItemDelegate(parent) {
 	assert(subfactory_);
@@ -63,7 +63,7 @@ void ItemIconDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
 	}
 
-	auto* icon = new ItemIcon(button_item);
+	auto* icon = new ItemIcon(button_item, dynamic_cast<QWidget*>(parent()));
 	icon->setGeometry(option.rect);
 	painter->save();
 	painter->translate(option.rect.topLeft());

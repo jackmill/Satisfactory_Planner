@@ -19,7 +19,7 @@ namespace ui {
 class ItemIconDelegate final : public QStyledItemDelegate {
 	Q_OBJECT
   public:
-	explicit ItemIconDelegate(std::shared_ptr<plan::Subfactory> subfactory, QObject* parent = nullptr);
+	explicit ItemIconDelegate(std::shared_ptr<plan::Subfactory> subfactory, QWidget* parent = nullptr);
 
 	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
