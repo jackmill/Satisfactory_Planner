@@ -40,7 +40,7 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
 
     decltype(plan::Factory::subfactories_) new_subfactories;
     for (const auto& json_subfactory : json.at("subfactories")) {
-        // Name and Icon
+        // Name and TableIcon
         Subfactory temp(json_subfactory.at("name"), json_subfactory.at("icon"));
 
         // Targets

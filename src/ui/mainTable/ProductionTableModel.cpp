@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "ProductionTableModel.h"
-#include "ProductLineEditDialog.h"
+#include "recipeSelectDialog/ProductLineEditDialog.h"
 #include "../util.h"
 
 namespace ui {
@@ -55,6 +55,7 @@ QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
         if (column == Column::Checked) {
             return product_line.isDone() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
         }
+
     } else if (role == Qt::ItemDataRole::DecorationRole) {
         if (column == Column::Product) {
             return util::itemIconFromDisplayName(QString::fromStdString(product_line.target()->name()));
@@ -73,12 +74,8 @@ QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
             } else {
                 return {};
             }
-        } else if (column == Column::Ingredient1) { return ingredientIcon(0, product_line);
-        } else if (column == Column::Ingredient2) { return ingredientIcon(1, product_line);
-        } else if (column == Column::Ingredient3) { return ingredientIcon(2, product_line);
-        } else if (column == Column::Ingredient4) { return ingredientIcon(3, product_line);
-
         }
+
     } else if (role == Qt::ItemDataRole::EditRole) {
 		if (column == Column::Percentage) {
 			return product_line.percent();
@@ -97,16 +94,30 @@ QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
 			    return QString("%1 : %2").arg(QString::fromStdString(product_line.byproduct().name())).arg(product_line.byproduct().rate());
 		    }
 
-	    } else if (column == Column::Ingredient1) { return ingredientData(0, product_line);
-	    } else if (column == Column::Ingredient2) { return ingredientData(1, product_line);
-	    } else if (column == Column::Ingredient3) { return ingredientData(2, product_line);
-	    } else if (column == Column::Ingredient4) { return ingredientData(3, product_line);
+	    } else if (column == Column::Building) {
+		    return QString("%1 : %2").arg(QString::fromStdString(product_line.recipe().machine().name()),
+										  QString::number(product_line.multiplier()));
 
-	    }
+		} else if (column == Column::Ingredients) {
+			QString ingredients_tooltip;
+			const std::vector<data::Item>& ingredients = product_line.ingredients();
+
+			for (auto ingredient = ingredients.cbegin();
+					ingredient != ingredients.cend();
+					++ingredient) {
+				ingredients_tooltip += QString("%1 : %2").arg(QString::fromStdString(ingredient->name()),
+				                                              QString::number(ingredient->rate()));
+
+				if (ingredient != std::prev(ingredients.end())) {
+					ingredients_tooltip += "\n";
+				}
+			}
+
+			return ingredients_tooltip;
+		}
     }
 
     return {};
-
 }
 
 bool ProductionTableModel::setData(const QModelIndex &index, const QVariant &value, int role) {
@@ -155,10 +166,7 @@ QVariant ProductionTableModel::headerData(int section, Qt::Orientation orientati
 		case Column::ClockSpeed :   return tr("Clock Speed");
         case Column::Power :        return tr("Power");
         case Column::Byproduct :    return tr("Byproduct");
-        case Column::Ingredient1 :  return tr("Ingredient 1");
-        case Column::Ingredient2 :  return tr("Ingredient 2");
-        case Column::Ingredient3 :  return tr("Ingredient 3");
-        case Column::Ingredient4 :  return tr("Ingredient 4");
+        case Column::Ingredients :  return tr("Ingredients");
     }
 
     return {};
@@ -207,10 +215,7 @@ Qt::ItemFlags ProductionTableModel::flags(const QModelIndex &index) const {
         case Column::Building:
         case Column::Power:
         case Column::Byproduct:
-        case Column::Ingredient1:
-        case Column::Ingredient2:
-        case Column::Ingredient3:
-        case Column::Ingredient4:
+		case Column::Ingredients:
             return QAbstractTableModel::flags(index);
     }
 

@@ -38,7 +38,7 @@ SubfactoryEditDialog::SubfactoryEditDialog(const plan::Subfactory &subfactory, Q
     connect(actions_, &QDialogButtonBox::rejected, this, &SubfactoryEditDialog::reject);
 
     layout_->addRow(tr("Label: "), name_);
-    layout_->addRow(tr("Icon: "), icon_);
+    layout_->addRow(tr("TableIcon: "), icon_);
     layout_->addWidget(actions_);
 }
 

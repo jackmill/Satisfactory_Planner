@@ -10,11 +10,12 @@
 #include <QPushButton>
 
 #include "ProductionPane.h"
-#include "ProductLineEditDialog.h"
-#include "../elements/ItemButton.h"
+#include "recipeSelectDialog/ProductLineEditDialog.h"
 #include "../elements/ItemSelectionDialog.h"
+#include "../elements/TableIcon.h"
 #include "SpinBoxDelegate.h"
-#include "ItemIconDelegate.h"
+#include "TableIconDelegate.h"
+#include "IconListDelegate.h"
 
 namespace ui {
 
@@ -95,7 +96,6 @@ void ProductionPane::initTargets() {
     targets_->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	targets_->addAction(actions_.target_act_new);
-
     auto* target_spacer = new QAction(this);
     target_spacer->setSeparator(true);
 	targets_->addAction(target_spacer);
@@ -147,9 +147,13 @@ void ProductionPane::initTable() {
     table_model_ = new ProductionTableModel(subfactory_, db_, this);
     production_table_->setModel(table_model_);
 
-	auto* target_icon_delegate = new ItemIconDelegate(subfactory_, this);
+	auto* single_icon_delegate = new TableIconDelegate(subfactory_, this);
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Product),
-												target_icon_delegate);
+	                                            single_icon_delegate);
+	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Building),
+	                                            single_icon_delegate);
+	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Byproduct),
+	                                            single_icon_delegate);
 
 	auto* percentage_delegate = new SpinBoxDelegate(0.01, 100.0, this);
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Percentage),
@@ -159,21 +163,9 @@ void ProductionPane::initTable() {
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::ClockSpeed),
 	                                            clock_speed_delegate);
 
-	auto* byproduct_icon_delegate = new ItemIconDelegate(subfactory_, this);
-	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Byproduct),
-												byproduct_icon_delegate);
-	auto* ing1_icon_delegate = new ItemIconDelegate(subfactory_, this);
-	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Ingredient1),
-	                                            ing1_icon_delegate);
-	auto* ing2_icon_delegate = new ItemIconDelegate(subfactory_, this);
-	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Ingredient2),
-	                                            ing2_icon_delegate);
-	auto* ing3_icon_delegate = new ItemIconDelegate(subfactory_, this);
-	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Ingredient3),
-	                                            ing3_icon_delegate);
-	auto* ing4_icon_delegate = new ItemIconDelegate(subfactory_, this);
-	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Ingredient4),
-	                                            ing4_icon_delegate);
+	auto* ingredients_delegate = new IconListDelegate(subfactory_, this);
+	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Ingredients),
+												ingredients_delegate);
 
 	connect(table_model_, &ProductionTableModel::dataChanged, this, &ProductionPane::S_refreshAll);
     connect(table_model_, &ProductionTableModel::rowsInserted, this, &ProductionPane::S_factoryChanged);
@@ -183,6 +175,7 @@ void ProductionPane::initTable() {
 
 void ProductionPane::resizeAll() {
     production_table_->resizeColumnsToContents();
+	production_table_->resizeRowsToContents();
     byproducts_->resizeColumnsToContents();
     ingredients_->resizeColumnsToContents();
 }
@@ -273,7 +266,7 @@ void ProductionPane::S_addToTable(std::shared_ptr<data::Item> target) {
             table_model_->insertRows(table_model_->rowCount(QModelIndex()),
                                      QModelIndex(),
                                      plan::ProductLine(std::move(target), recipes.at(0)));
-            production_table_->setRowHeight(table_model_->rowCount(QModelIndex()), ui::ItemIcon::kSize_.height());
+            production_table_->setRowHeight(table_model_->rowCount(QModelIndex()), ui::TableIcon::kSize_.height());
 			added_to_table = true;
         }
 
@@ -284,7 +277,7 @@ void ProductionPane::S_addToTable(std::shared_ptr<data::Item> target) {
                 table_model_->insertRows(table_model_->rowCount(QModelIndex()),
                                          QModelIndex(),
                                          plan::ProductLine(std::move(target), dialog->getSelectedRecipe()));
-	            production_table_->setRowHeight(table_model_->rowCount(QModelIndex()), ui::ItemIcon::kSize_.height());
+	            production_table_->setRowHeight(table_model_->rowCount(QModelIndex()), ui::TableIcon::kSize_.height());
 				added_to_table = true;
             }
             dialog->deleteLater();

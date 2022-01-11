@@ -1,0 +1,62 @@
+/**
+ * @project Satisfactory_Planner
+ * @file TableIcon.cpp
+ * 
+ * @author Jackson Miller
+ * @date 2022-01-10
+ * @copyright (c) 2022 Jackson Miller
+ */
+
+#include <QLabel>
+#include <QIcon>
+
+#include "TableIcon.h"
+#include "../util.h"
+
+namespace ui {
+
+TableIcon::TableIcon(const QString& icon_label, QWidget* parent) :
+		QPushButton(parent) {
+
+	setFixedSize(kSize_);
+	layout_ = new QVBoxLayout(this);
+	layout_->setMargin(2);
+	layout_->addSpacerItem(new QSpacerItem(kSize_.width(), kSize_.height()));
+
+	setIcon(util::itemIconFromDisplayName(icon_label));
+	setIconSize(kSize_ * 0.9);
+}
+
+TableIcon::TableIcon(const QString& icon_label, int rate, QWidget* parent) :
+		TableIcon(icon_label, parent) {
+	setText(rate);
+}
+
+TableIcon::TableIcon(const QString& icon_label, float rate, QWidget* parent) :
+		TableIcon(icon_label, parent) {
+	setText(rate);
+}
+
+void TableIcon::setText(int rate) {
+	auto* label = new QLabel(QString::number(rate), this);
+	auto label_font = QFont(label->font());
+	label_font.setPixelSize(kSize_.height() / 4);
+	label->setFont(label_font);
+	label->setAlignment(Qt::AlignRight);
+	label->setStyleSheet("font: bold; color: white; background-color: #E59344; border-radius: 3px; margin: 1px");
+
+	layout_->addWidget(label, Qt::AlignRight, Qt::AlignRight);
+}
+
+void TableIcon::setText(float rate) {
+	auto* label = new QLabel(util::formatItemNumber(rate), this);
+	auto label_font = QFont(label->font());
+	label_font.setPixelSize(kSize_.height() / 4);
+	label->setFont(label_font);
+	label->setAlignment(Qt::AlignRight);
+	label->setStyleSheet("font: bold; color: white; background-color: #E59344; border-radius: 3px; margin: 1px");
+
+	layout_->addWidget(label, Qt::AlignRight, Qt::AlignRight);
+}
+
+}

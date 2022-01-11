@@ -22,9 +22,6 @@
 #include "subfactoryPane/SubfactoryPane.h"
 #include "mainTable/ProductionPane.h"
 
-#include "elements/ItemButton.h"
-#include "elements/ItemIcon.h"
-
 namespace ui {
 
 class MainWindow : public QMainWindow {

@@ -29,7 +29,7 @@ inline QIcon itemIconFromDisplayName(const QString &display_name) {
     }
 }
 
-inline QString formatItemNumber(const int& num) {
+inline QString formatItemNumber(int num) {
     QString item_count_formatted;
     if (num > 9999) {
         item_count_formatted = QString::number(num / 1000) + '.';

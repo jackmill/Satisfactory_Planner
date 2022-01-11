@@ -8,7 +8,7 @@
  */
 
 #include "ProductLineEditDialog.h"
-
+#include "RecipeIconDelegate.h"
 
 namespace ui {
 
@@ -23,7 +23,19 @@ ProductLineEditDialog::ProductLineEditDialog(std::vector<data::Recipe> recipes, 
     recipe_model_ = new RecipeSelectModel(recipes_, this);
     recipe_table_->setModel(recipe_model_);
     recipe_table_->setSelectionBehavior(QAbstractItemView::SelectRows);
+
+	auto* icon_delegate = new RecipeIconDelegate(recipes_, this);
+	recipe_table_->setItemDelegateForColumn(static_cast<int>(RecipeSelectModel::Column::kIngredients),
+	                                        icon_delegate);
+
+	recipe_table_->setItemDelegateForColumn(static_cast<int>(RecipeSelectModel::Column::kProducts),
+	                                        icon_delegate);
+
+	recipe_table_->setItemDelegateForColumn(static_cast<int>(RecipeSelectModel::Column::kBuilding),
+	                                        icon_delegate);
+
     recipe_table_->resizeColumnsToContents();
+	recipe_table_->resizeRowsToContents();
 
     actions_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(actions_, &QDialogButtonBox::accepted, this, &ProductLineEditDialog::accept);
@@ -57,7 +69,7 @@ data::Recipe ProductLineEditDialog::getSelectedRecipe() {
 int ProductLineEditDialog::tableWidth() const {
 	int table_width = 0;
 
-	for (int col = 0; col < ui::RecipeSelectModel::column_count; ++col) {
+	for (int col = 0; col < RecipeSelectModel::column_count_; ++col) {
 		table_width += recipe_table_->columnWidth(col);
 	}
 

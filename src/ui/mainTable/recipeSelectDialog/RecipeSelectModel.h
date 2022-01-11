@@ -30,17 +30,15 @@ class RecipeSelectModel : public QAbstractTableModel {
 
 	enum class Column {
 		kName = 0,
-		kIngredient1,
-		kIngredient2,
-		kIngredient3,
-		kIngredient4,
+		kIngredients,
+		kArrow1,
 		kTime,
 		kBuilding,
-		kProduct1,
-		kProduct2
+		kArrow2,
+		kProducts
 	};
 
-	static const int column_count = static_cast<int>(Column::kProduct2) + 1;
+	const static int column_count_ = static_cast<int>(Column::kProducts) + 1;
 
   private:
     std::vector<data::Recipe> recipes_;

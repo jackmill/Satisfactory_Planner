@@ -8,7 +8,7 @@
  */
 
 #include "RecipeSelectModel.h"
-#include "../util.h"
+#include "../../util.h"
 
 namespace ui {
 
@@ -22,11 +22,11 @@ data::Recipe RecipeSelectModel::getSelectedRecipe(const QModelIndex &index) cons
 }
 
 int RecipeSelectModel::rowCount(const QModelIndex &parent) const {
-    return recipes_.size();
+    return static_cast<int>(recipes_.size());
 }
 
 int RecipeSelectModel::columnCount(const QModelIndex &parent) const {
-    return static_cast<int> (Column::kProduct2) + 1;
+    return column_count_;
 }
 
 QVariant RecipeSelectModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -37,14 +37,12 @@ QVariant RecipeSelectModel::headerData(int section, Qt::Orientation orientation,
     const auto column = static_cast<Column> (section);
     switch(column) {
         case Column::kName :        return tr("Recipe");
-        case Column::kIngredient1 : return tr("Ingredient 1");
-        case Column::kIngredient2 : return tr("Ingredient 2");
-        case Column::kIngredient3 : return tr("Ingredient 3");
-        case Column::kIngredient4 : return tr("Ingredient 4");
+        case Column::kIngredients : return tr("Ingredients");
+		case Column::kArrow1 :      return {};
         case Column::kTime :        return tr("Time");
         case Column::kBuilding :    return tr("Building");
-        case Column::kProduct1 :    return tr("Product 1");
-        case Column::kProduct2 :    return tr("Product 2");
+		case Column::kArrow2 :      return {};
+        case Column::kProducts :    return tr("Products");
     }
 
     return {};
@@ -59,38 +57,64 @@ QVariant RecipeSelectModel::data(const QModelIndex &index, int role) const {
         if (column == Column::kName) {
             return QString::fromStdString(recipe.name());
 
-        } else if (column == Column::kIngredient1) { return ingredientData(0, recipe);
-        } else if (column == Column::kIngredient2) { return ingredientData(1, recipe);
-        } else if (column == Column::kIngredient3) { return ingredientData(2, recipe);
-        } else if (column == Column::kIngredient4) {
-            return ingredientData(3, recipe);
-
         } else if (column == Column::kTime) {
             return QString("%1 Sec").arg(recipe.time());
 
         } else if (column == Column::kBuilding) {
             return QString::fromStdString(recipe.machine().name());
 
-        } else if (column == Column::kProduct1) {
-            return QString("%1 : %2").arg(QString::fromStdString(recipe.productList().at(0).name())).arg(recipe.productList().at(0).amount());
-        } else if (column == Column::kProduct2) {
-            if (product_list.size() > 1) {
-                return QString("%1 : %2").arg(QString::fromStdString(recipe.productList().at(1).name())).arg(recipe.productList().at(1).amount());
-            }
-        }
+        } else if (column == Column::kArrow1 || column == Column::kArrow2) {
+			return QString(">");
+		}
+
     } else if (role == Qt::ItemDataRole::DecorationRole) {
-        if (column == Column::kIngredient1) { return ingredientIcon(0, recipe);
-        } else if (column == Column::kIngredient2) { return ingredientIcon(1, recipe);
-        } else if (column == Column::kIngredient3) { return ingredientIcon(2, recipe);
-        } else if (column == Column::kIngredient4) { return ingredientIcon(3, recipe);
-        } else if (column == Column::kBuilding) { return util::itemIconFromDisplayName(QString::fromStdString(recipe.machine().name()));
-        } else if (column == Column::kProduct1) { return util::itemIconFromDisplayName(QString::fromStdString(recipe.productList().at(0).name()));
-        } else if (column == Column::kProduct2) {
-            if (product_list.size() > 1 ) {
-                return util::itemIconFromDisplayName(QString::fromStdString(recipe.productList().at(1).name()));
-            }
+        if (column == Column::kBuilding) {
+			return util::itemIconFromDisplayName(QString::fromStdString(recipe.machine().name()));
         }
-    }
+    } else if (role == Qt::ItemDataRole::ToolTipRole) {
+		if (column == Column::kIngredients) {
+			QString ingredients_tooltip;
+			const std::vector<data::Item>& ingredients = recipe.ingredientList();
+
+			for (auto ingredient = ingredients.cbegin();
+			     ingredient != ingredients.cend();
+			     ++ingredient) {
+				ingredients_tooltip += QString("%1 : %2").arg(QString::fromStdString(ingredient->name()),
+				                                              QString::number(ingredient->amount()));
+
+				if (ingredient != std::prev(ingredients.end())) {
+					ingredients_tooltip += "\n";
+				}
+			}
+
+			return ingredients_tooltip;
+
+		} else if (column == Column::kProducts) {
+			QString products_tooltip;
+			const std::vector<data::Item>& products = recipe.productList();
+
+			for (auto ingredient = products.cbegin();
+			     ingredient != products.cend();
+			     ++ingredient) {
+				products_tooltip += QString("%1 : %2").arg(QString::fromStdString(ingredient->name()),
+				                                           QString::number(ingredient->amount()));
+
+				if (ingredient != std::prev(products.end())) {
+					products_tooltip += "\n";
+				}
+			}
+
+			return products_tooltip;
+
+		} else if (column == Column::kBuilding) {
+			return QString::fromStdString(recipe.machine().name());
+		}
+
+	} else if (role == Qt::ItemDataRole::TextAlignmentRole) {
+		if (column == Column::kArrow1 || column == Column::kArrow2) {
+			return Qt::AlignCenter;
+		}
+	}
 
     return {};
 }

@@ -23,7 +23,7 @@ class ProductionTableModel final : public QAbstractTableModel {
     explicit ProductionTableModel(std::shared_ptr<plan::Subfactory> subfactory, std::shared_ptr<data::Library> db, QObject* parent = nullptr);
 
     [[nodiscard]] int rowCount(const QModelIndex &parent) const final;
-    [[nodiscard]] int columnCount(const QModelIndex &parent) const final { return static_cast<int> (Column::Ingredient4) + 1; };
+    [[nodiscard]] int columnCount(const QModelIndex &parent) const final { return static_cast<int> (Column::Ingredients) + 1; };
     [[nodiscard]] QVariant data(const QModelIndex &index, int role) const final;
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const final;
@@ -44,10 +44,7 @@ class ProductionTableModel final : public QAbstractTableModel {
 		ClockSpeed,
         Power,
         Byproduct,
-        Ingredient1,
-        Ingredient2,
-        Ingredient3,
-        Ingredient4
+        Ingredients
     };
 
   private:
