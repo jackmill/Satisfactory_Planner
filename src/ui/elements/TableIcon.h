@@ -12,6 +12,7 @@
 
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QLabel>
 
 namespace ui {
 
@@ -23,11 +24,10 @@ class TableIcon : public QPushButton {
 
 	constexpr static const QSize kSize_ = QSize(50, 50);
 
-  private:
+  protected:
 	QVBoxLayout* layout_ = nullptr;
+	static void formatIconLabel(QLabel* label);
 
-	void setText(int rate);
-	void setText(float rate);
 };
 
 } // namespace ui

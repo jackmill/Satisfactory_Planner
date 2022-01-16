@@ -8,6 +8,7 @@
  */
 
 #include <QCheckBox>
+#include <QLocale>
 
 #include <vector>
 
@@ -17,7 +18,7 @@
 
 namespace ui {
 
-ProductionTableModel::ProductionTableModel(std::shared_ptr<plan::Subfactory> subfactory, std::shared_ptr<data::Library> db, QObject *parent) :
+ProductionTableModel::ProductionTableModel(plan::Subfactory_Ptr subfactory, std::shared_ptr<data::Library> db, QObject *parent) :
     subfactory_(std::move(subfactory)),
     db_(std::move(db)),
     QAbstractTableModel(parent) {
@@ -25,13 +26,13 @@ ProductionTableModel::ProductionTableModel(std::shared_ptr<plan::Subfactory> sub
 }
 
 int ProductionTableModel::rowCount(const QModelIndex &parent) const {
-    return static_cast<int> (subfactory_->product_lines_.size());
+    return static_cast<int> ((*subfactory_)->product_lines_.size());
 }
 
 
 
 QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
-    const auto &product_line = subfactory_->product_lines_.at(index.row());
+    const auto &product_line = (*subfactory_)->product_lines_.at(index.row());
     const auto column = static_cast<Column> (index.column());
 
     if (role == Qt::ItemDataRole::DisplayRole) {
@@ -41,14 +42,11 @@ QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
         } else if (column == Column::Percentage){
 			return QString("%1%").arg(product_line.percent());
 
-        } else if (column == Column::Building) {
-	        return QString("%1 : %2").arg(QString::fromStdString(product_line.recipe().machine().name())).arg(product_line.multiplier());
-
         } else if (column == Column::ClockSpeed) {
 			return QString("%1%").arg(product_line.clock());
 
 		} else if (column == Column::Power) {
-            return QString("%1 MW").arg(product_line.power());
+            return QString("%1 MW").arg(QLocale(QLocale::system()).toString(product_line.power()));
 
         }
     } else if (role == Qt::ItemDataRole::CheckStateRole) {
@@ -67,7 +65,7 @@ QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
             std::vector<data::Item> product_list = product_line.calcProducts();
             if (product_list.size() > 1) {
                 for (const auto &product : product_list) {
-                    if (product != *product_line.target()) {
+                    if (product != product_line.target()->target()) {
                         return util::itemIconFromDisplayName(QString::fromStdString(product.name()));
                     }
                 }
@@ -86,17 +84,19 @@ QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
 		}
 	} else if (role == Qt::ItemDataRole::ToolTipRole) {
 	    if (column == Column::Product) {
-		    return QString("%1 : %2").arg(QString::fromStdString(product_line.target()->name())).arg(product_line.productOutput());
+		    return QString("%1 : %2").arg(QString::fromStdString(product_line.target()->name()),
+										  QLocale(QLocale::system()).toString(product_line.productOutput()));
 
 	    } else if (column == Column::Byproduct) {
 
 		    if (product_line.hasByproduct()) {
-			    return QString("%1 : %2").arg(QString::fromStdString(product_line.byproduct().name())).arg(product_line.byproduct().rate());
+			    return QString("%1 : %2").arg(QString::fromStdString(product_line.byproduct().name()),
+											  QLocale(QLocale::system()).toString(product_line.byproduct().rate()));
 		    }
 
 	    } else if (column == Column::Building) {
 		    return QString("%1 : %2").arg(QString::fromStdString(product_line.recipe().machine().name()),
-										  QString::number(product_line.multiplier()));
+		                                  QLocale(QLocale::system()).toString(product_line.multiplier()));
 
 		} else if (column == Column::Ingredients) {
 			QString ingredients_tooltip;
@@ -106,7 +106,7 @@ QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
 					ingredient != ingredients.cend();
 					++ingredient) {
 				ingredients_tooltip += QString("%1 : %2").arg(QString::fromStdString(ingredient->name()),
-				                                              QString::number(ingredient->rate()));
+				                                              QLocale(QLocale::system()).toString(ingredient->rate()));
 
 				if (ingredient != std::prev(ingredients.end())) {
 					ingredients_tooltip += "\n";
@@ -122,7 +122,7 @@ QVariant ProductionTableModel::data(const QModelIndex &index, int role) const {
 
 bool ProductionTableModel::setData(const QModelIndex &index, const QVariant &value, int role) {
     const auto column = static_cast<Column> (index.column());
-    auto &product_line = subfactory_->product_lines_.at(index.row());
+    auto &product_line = (*subfactory_)->product_lines_.at(index.row());
     bool success = false;
 
     if (role == Qt::ItemDataRole::CheckStateRole) {
@@ -175,28 +175,28 @@ QVariant ProductionTableModel::headerData(int section, Qt::Orientation orientati
 bool ProductionTableModel::insertRows(int startRow, const QModelIndex &parent, plan::ProductLine product_line) {
     beginInsertRows(parent, startRow, startRow);
 
-    subfactory_->product_lines_.push_back(std::move(product_line));
+    (*subfactory_)->product_lines_.push_back(std::move(product_line));
 
     endInsertRows();
     return true;
 }
 
 bool ProductionTableModel::removeRows(int startRow, int count, const QModelIndex &parent) {
-    if (count == 0 || subfactory_->product_lines_.empty()) {
+    if (count == 0 || (*subfactory_)->product_lines_.empty()) {
         return false;
     }
 
     const int end_row = startRow + count - 1;
     beginRemoveRows(parent, startRow, end_row);
-    subfactory_->product_lines_.erase(subfactory_->product_lines_.cbegin() + startRow,
-                                     subfactory_->product_lines_.cbegin() + (end_row + 1));
+    (*subfactory_)->product_lines_.erase((*subfactory_)->product_lines_.cbegin() + startRow,
+                                     (*subfactory_)->product_lines_.cbegin() + (end_row + 1));
     endRemoveRows();
     refreshModel();
     return true;
 }
 
-std::shared_ptr<data::Item> ProductionTableModel::getRowTarget(const QModelIndex &index) const {
-    return subfactory_->product_lines_.at(index.row()).target();
+std::shared_ptr<plan::ProductTarget> ProductionTableModel::getRowTarget(const QModelIndex &index) const {
+    return (*subfactory_)->product_lines_.at(index.row()).target();
 }
 
 Qt::ItemFlags ProductionTableModel::flags(const QModelIndex &index) const {

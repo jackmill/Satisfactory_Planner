@@ -28,13 +28,14 @@ namespace ui {
 class ProductionPane final : public QWidget {
     Q_OBJECT
   public:
-    ProductionPane(std::shared_ptr<plan::Subfactory> subfactory, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+    ProductionPane(const std::shared_ptr<plan::Subfactory>& subfactory, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
 
 
     void resizeAll();
+	void changeSubfactory(std::shared_ptr<plan::Subfactory> subfactory);
 
   private:
-    std::shared_ptr<plan::Subfactory> subfactory_;
+    plan::Subfactory_Ptr subfactory_;
     std::shared_ptr<data::Library> db_;
 
     QGroupBox* targets_widget_ = nullptr;
@@ -82,7 +83,7 @@ class ProductionPane final : public QWidget {
     void S_addNewTarget();
     void S_editTarget(const QModelIndex &index);
     void S_removeTarget(const QModelIndex& index);
-    void S_addToTable(std::shared_ptr<data::Item> target);
+    void S_addToTable(std::shared_ptr<plan::ProductTarget> target);
 	void S_refreshAll();
 	void S_targetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 

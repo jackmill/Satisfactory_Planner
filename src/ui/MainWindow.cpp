@@ -113,7 +113,11 @@ void MainWindow::InitMenu() {
 }
 
 void MainWindow::InitUI() {
-    subfactory_pane_ = new SubfactoryPane(factory_, db_, contents_);
+    if (!restoreGeometry(Settings::GetMainWindowGeometry())) {
+		resize(1000, 800);
+	}
+
+	subfactory_pane_ = new SubfactoryPane(factory_, db_, contents_);
     splitter_->addWidget(subfactory_pane_);
 
     production_pane_ = new ProductionPane(factory_->subfactories_.at(0), db_, this);
@@ -226,9 +230,10 @@ void MainWindow::updateRecents() {
 void MainWindow::closeEvent(QCloseEvent* event) {
     if (!askAboutUnsavedData()) {
         event->ignore();
-    } else {
-        event->accept();
+		return;
     }
+	Settings::SetMainWindowGeometry(saveGeometry());
+	event->accept();
 }
 
 void MainWindow::S_fileNew() {
@@ -312,10 +317,13 @@ void MainWindow::S_aboutQt() {
 }
 
 void MainWindow::S_selectedSubfactoryChanged() {
-    production_pane_->deleteLater();
+	production_pane_->changeSubfactory(subfactory_pane_->selectedSubfactory());
+
+	/*
+	production_pane_->deleteLater();
     production_pane_ = new ProductionPane(subfactory_pane_->selectedSubfactory(), db_, this);
-    production_pane_->resizeAll();
     splitter_->addWidget(production_pane_);
+    */
 }
 
 void MainWindow::S_factoryChanged() {

@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
         elements/ItemSelectionDialog.cpp
         elements/ItemListModel.cpp
         elements/TableIcon.cpp
+        elements/BuildingTableIcon.cpp
 
         mainTable/ProductionPane.cpp
         mainTable/ProductionTableModel.cpp

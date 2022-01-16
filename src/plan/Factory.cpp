@@ -45,26 +45,26 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
 
         // Targets
         for (const auto &json_target : json_subfactory.at("targets")) {
-            data::Item temp_item(json_target.at("class_name"), factory.db_.value());
-            temp_item.setRate(json_target.at("rate"));
-            temp.addTarget(std::make_shared<data::Item>(temp_item));
+            data::Item temp_item(json_target.at("item").at("class_name"), factory.db_.value());
+            temp_item.setRate(json_target.at("item").at("rate"));
+            temp.addTarget(std::make_shared<ProductTarget>(uuids::uuid::from_string(json_target.at("id").get<std::string>()), temp_item));
         }
 
         // Byproducts
         if (json_subfactory.contains("byproducts")) {
             for (const auto& json_target: json_subfactory.at("byproducts")) {
-                data::Item temp_item(json_target.at("class_name"), factory.db_.value());
-                temp_item.setRate(json_target.at("rate"));
-                temp.byproducts_.emplace_back(std::make_shared<data::Item>(temp_item));
+                data::Item temp_item(json_target.at("item").at("class_name"), factory.db_.value());
+                temp_item.setRate(json_target.at("item").at("rate"));
+                temp.byproducts_.emplace_back(std::make_shared<ProductTarget>(uuids::uuid::from_string(json_target.at("id").get<std::string>()), temp_item));
             }
         }
 
         // Ingredients
         if (json_subfactory.contains("ingredients")) {
             for (const auto& json_target: json_subfactory.at("ingredients")) {
-                data::Item temp_item(json_target.at("class_name"), factory.db_.value());
-                temp_item.setRate(json_target.at("rate"));
-                temp.ingredients_.emplace_back(std::make_shared<data::Item>(temp_item));
+                data::Item temp_item(json_target.at("item").at("class_name"), factory.db_.value());
+                temp_item.setRate(json_target.at("item").at("rate"));
+                temp.ingredients_.emplace_back(std::make_shared<ProductTarget>(uuids::uuid::from_string(json_target.at("id").get<std::string>()), temp_item));
             }
         }
 
@@ -75,10 +75,11 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
                 // Search for the target of this product line in the targets and ingredients
                 bool found_target = false;
                 for (const auto& target: temp.targets_) {
-                    if (json_line.at("target") == target->className()) {
+                    if (uuids::uuid::from_string(json_line.at("target").get<std::string>()) == target->id()) {
                         ProductLine temp_line(target, data::Recipe(json_line.at("recipe"), factory.db_.value()));
                         temp_line.setDone(json_line.at("done"));
 						temp_line.setClock(json_line.at("clock_speed"));
+						temp_line.setPercent(json_line.at("percent"));
                         temp.product_lines_.emplace_back(temp_line);
 
                         found_target = true;
@@ -89,11 +90,12 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
                 // If we found the target earlier, we don't need to look through ingredients for it
                 if (!found_target) {
                     for (const auto& ingredient: temp.ingredients_) {
-                        if (json_line.at("target") == ingredient->className()) {
+                        if (uuids::uuid::from_string(json_line.at("target").get<std::string>()) == ingredient->id()) {
                             ProductLine temp_line(ingredient,
                                                   data::Recipe(json_line.at("recipe"), factory.db_.value()));
                             temp_line.setDone(json_line.at("done"));
 							temp_line.setClock(json_line.at("clock_speed"));
+	                        temp_line.setPercent(json_line.at("percent"));
                             temp.product_lines_.emplace_back(temp_line);
 
                             break;

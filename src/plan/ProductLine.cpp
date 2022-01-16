@@ -15,12 +15,13 @@ namespace plan {
 
 void to_json(nlohmann::json &json, const ProductLine &product_line) {
     json["done"] = product_line.complete_;
-    json["target"] = product_line.target_->className();
+    json["target"] = uuids::to_string(product_line.target_->id());
     json["recipe"] = product_line.recipe_.className();
-	json["clock_speed"] = product_line.clock_speed_;
+	json["clock_speed"] = product_line.clock_speed_ * 100;
+	json["percent"] = product_line.percentage_ * 100;
 }
 
-ProductLine::ProductLine(std::shared_ptr<data::Item> target, data::Recipe recipe) :
+ProductLine::ProductLine(std::shared_ptr<ProductTarget> target, data::Recipe recipe) :
         target_(std::move(target)),
         recipe_(std::move(recipe)),
         multiplier_(1) {
@@ -39,7 +40,7 @@ void ProductLine::changeRecipe(const data::Recipe &recipe) {
 void ProductLine::updateMultiplier(const float &target_per_min) {
 	int target_recipe_amount;
     for (const auto &product : recipe_.productList()) {
-        if (product == *target_) {
+        if (product == target_->target()) {
             target_recipe_amount = product.amount();
         }
     }
@@ -78,7 +79,7 @@ void ProductLine::calculate() {
 
     std::vector<data::Item> products = calcProducts();
     for (auto& prod : products) {
-        if (prod != *target_) {
+        if (prod != target_->target()) {
             byproduct_ = std::move(prod);
         }
     }
@@ -102,7 +103,7 @@ void ProductLine::validate() {
 
     int target_recipe_amount;
     for (const auto &product : recipe_.productList()) {
-        if (product == *target_) {
+        if (product == target_->target()) {
             target_recipe_amount = product.amount();
         }
     }

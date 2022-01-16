@@ -19,17 +19,17 @@ namespace ui {
 class SubfacItemListModel : public QAbstractTableModel {
     Q_OBJECT
   public:
-    explicit SubfacItemListModel(std::vector<std::shared_ptr<data::Item>> list, QObject* parent = nullptr);
+    explicit SubfacItemListModel(std::vector<std::shared_ptr<plan::ProductTarget>> list, QObject* parent = nullptr);
 
     [[nodiscard]] int columnCount(const QModelIndex& parent) const final { return static_cast<int> (Column::kRate) + 1; };
-    [[nodiscard]] int rowCount(const QModelIndex& parent) const final { return static_cast<int> (item_list.size()); }
+    [[nodiscard]] int rowCount(const QModelIndex& parent) const final { return static_cast<int> (item_list_.size()); }
 
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const final;
     [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
 
     void refreshModel();
-    void refreshModel(std::vector<std::shared_ptr<data::Item>> new_list);
-    [[nodiscard]] std::shared_ptr<data::Item> getTarget(const QModelIndex& index) const;
+    void refreshModel(std::vector<std::shared_ptr<plan::ProductTarget>> new_list);
+    [[nodiscard]] std::shared_ptr<plan::ProductTarget> getTarget(const QModelIndex& index) const;
 
     enum class Column {
         kItem = 0,
@@ -37,7 +37,7 @@ class SubfacItemListModel : public QAbstractTableModel {
     };
 
   private:
-    std::vector<std::shared_ptr<data::Item>> item_list;
+    std::vector<std::shared_ptr<plan::ProductTarget>> item_list_;
 };
 
 }

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "data/Recipe.h"
+#include "plan/ProductTarget.h"
 
 namespace plan {
 
@@ -20,14 +21,14 @@ class ProductLine {
     friend void to_json(nlohmann::json &json, const ProductLine &product_line);
 
   public:
-	ProductLine(std::shared_ptr<data::Item> target, data::Recipe recipe);
+	ProductLine(std::shared_ptr<ProductTarget> target, data::Recipe recipe);
 
     ProductLine& operator= (const ProductLine &rhs) { return *this; };
 
 	void changeRecipe(const data::Recipe &recipe);
 	void updateMultiplier(const float &target_per_min);
 
-    [[nodiscard]] std::shared_ptr<data::Item> target() const { return target_; };
+    [[nodiscard]] std::shared_ptr<ProductTarget> target() const { return target_; };
 	[[nodiscard]] float targetOutput() const { return target_->rate(); };
 	[[nodiscard]] float productOutput() const { return target_->rate() * percentage_; };
 	[[nodiscard]] float multiplier() const { return multiplier_; };
@@ -58,7 +59,7 @@ class ProductLine {
 
   private:
     bool complete_ = false;
-    std::shared_ptr<data::Item> target_;
+    std::shared_ptr<ProductTarget> target_;
 	float percentage_ = 1.0;
 	data::Recipe recipe_;
 	float clock_speed_ = 1.0;

@@ -7,6 +7,8 @@
  * @copyright (c) 2021 Jackson Miller
  */
 
+#include <QMouseEvent>
+
 #include "ProductLineEditDialog.h"
 #include "RecipeIconDelegate.h"
 
@@ -23,6 +25,10 @@ ProductLineEditDialog::ProductLineEditDialog(std::vector<data::Recipe> recipes, 
     recipe_model_ = new RecipeSelectModel(recipes_, this);
     recipe_table_->setModel(recipe_model_);
     recipe_table_->setSelectionBehavior(QAbstractItemView::SelectRows);
+	connect(recipe_table_,
+			&QTableView::doubleClicked,
+			this,
+			[this]{ done(QDialog::Accepted); });
 
 	auto* icon_delegate = new RecipeIconDelegate(recipes_, this);
 	recipe_table_->setItemDelegateForColumn(static_cast<int>(RecipeSelectModel::Column::kIngredients),
@@ -73,7 +79,7 @@ int ProductLineEditDialog::tableWidth() const {
 		table_width += recipe_table_->columnWidth(col);
 	}
 
-	return table_width;
+	return table_width + 10;
 }
 
 }

@@ -1,6 +1,10 @@
 add_library(plan
         Factory.cpp
         Subfactory.cpp
-        ProductLine.cpp)
+        ProductLine.cpp
+        ProductTarget.cpp
+        )
 
-target_link_libraries(plan data)
+find_package(stduuid REQUIRED)
+
+target_link_libraries(plan data stduuid::stduuid)

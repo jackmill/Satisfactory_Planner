@@ -17,6 +17,11 @@
 
 namespace ui::util {
 
+/**
+ * Generate QIcon from given item display name
+ * @param display_name
+ * @return
+ */
 inline QIcon itemIconFromDisplayName(const QString &display_name) {
     QString display_formatted = display_name;
 	display_formatted.replace(' ', '_');
@@ -29,15 +34,24 @@ inline QIcon itemIconFromDisplayName(const QString &display_name) {
     }
 }
 
+/**
+ * Format numbers greater than 10,000 to be "##.#k", rounded.\n
+ * @param num
+ * @return
+ */
 inline QString formatItemNumber(int num) {
-    QString item_count_formatted;
     if (num > 9999) {
-        item_count_formatted = QString::number(num / 1000) + '.';
-        item_count_formatted.append(QString::number(std::round(static_cast<float>(num % 1000) / 100)) + 'k');
+		// 12345 to 123; 12399 to 124
+		num = static_cast<int>(std::round(static_cast<float>(num) / 100));
+
+		// 12345 becomes "12.3k", 12399 becomes "12.4k", 12551 becomes "13.0k"
+		return QString("%1.%2k").arg(QString::number(num / 10), QString::number(num % 10));
+
     } else {
-        item_count_formatted = QString::number(num);
+        return QString::number(num);
     }
-    return item_count_formatted;
+
+//    return item_count_formatted;
 }
 
 }

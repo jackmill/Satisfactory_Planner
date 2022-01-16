@@ -14,6 +14,9 @@
 
 class Settings : public dragoonboots::qsettingscontainer::QSettingsContainer {
   public:
+	/** Window Geometry */
+	DGSETTINGS_SETTING(QByteArray, MainWindowGeometry, {})
+
     /** Path to docs.json data source */
 	DGSETTINGS_SETTING(QString, JsonDataPath, "")
 

@@ -7,6 +7,9 @@
  * @copyright (c) 2021 Jackson Miller
  */
 
+#include <random>
+#include <sstream>
+
 #include "plan/Subfactory.h"
 
 namespace plan {
@@ -16,15 +19,15 @@ void to_json(nlohmann::json &json, const Subfactory &subfactory) {
     json["icon"] = subfactory.icon_string_;
 
     for (auto target = subfactory.targets_.cbegin(); target != subfactory.targets_.cend(); ++target) {
-        json["targets"][target - subfactory.targets_.cbegin()] = **target;
+		json["targets"][target - subfactory.targets_.cbegin()] = **target;
     }
 
     for (auto byproduct = subfactory.byproducts_.cbegin(); byproduct != subfactory.byproducts_.cend(); ++byproduct) {
-        json["byproducts"][byproduct - subfactory.byproducts_.cbegin()] = **byproduct;
+		json["byproducts"][byproduct - subfactory.byproducts_.cbegin()] = **byproduct;
     }
 
     for (auto ingredient = subfactory.ingredients_.cbegin(); ingredient != subfactory.ingredients_.cend(); ++ingredient) {
-        json["ingredients"][ingredient - subfactory.ingredients_.cbegin()] = **ingredient;
+	    json["ingredients"][ingredient - subfactory.ingredients_.cbegin()] = **ingredient;
     }
 
     json["product_lines"] = subfactory.product_lines_;
@@ -39,11 +42,11 @@ void Subfactory::addProductLine(const ProductLine& product_line) {
     product_lines_.emplace_back(product_line);
 }
 
-void Subfactory::addTarget(const std::shared_ptr<data::Item> &target_product) {
-    targets_.emplace_back(target_product);
+void Subfactory::addTarget(const std::shared_ptr<ProductTarget>& target_product) {
+	targets_.emplace_back(target_product);
 }
 
-float Subfactory::targetRemainder(const std::shared_ptr<data::Item>& target) const {
+float Subfactory::targetRemainder(const std::shared_ptr<ProductTarget>& target) const {
     float target_rate = target->rate();
     for (const auto &product : product_lines_) {
         if (product.target() == target) {
@@ -53,18 +56,18 @@ float Subfactory::targetRemainder(const std::shared_ptr<data::Item>& target) con
     return target_rate;
 }
 
-bool Subfactory::isTarget(const std::shared_ptr<data::Item>& item) const {
+bool Subfactory::isTarget(const std::shared_ptr<ProductTarget>& item) const {
     return std::any_of(product_lines_.cbegin(), product_lines_.cend(),
                        [item] (const plan::ProductLine& line){ return line.target() == item; });
 }
 
-std::vector<std::shared_ptr<data::Item>> Subfactory::ingredientsNotOnTable() const {
-    std::vector<std::shared_ptr<data::Item>> out;
+std::vector<std::shared_ptr<ProductTarget>> Subfactory::ingredientsNotOnTable() const {
+    std::vector<std::shared_ptr<ProductTarget>> out;
 
     for (const auto& ingredient : ingredients_) {
         // TODO: Allow separation of ingredient-targeted product lines
-		if (!isTarget(ingredient)/* || targetRemainder(ingredient) > 0*/) {
-            out.push_back(ingredient);
+		if (!isTarget(ingredient)) {
+			out.push_back(ingredient);
         }
     }
 
@@ -85,7 +88,7 @@ void Subfactory::updateIngredients() {
                 bool exists = false;
                 for (auto& ingredient : ingredients_) {
 
-                    if (line_ingredient == *ingredient) {
+                    if (line_ingredient == ingredient->target()) {
                         exists = true;
                         ingredient->setRate(ingredient->rate() + line_ingredient.rate());
                     }
@@ -93,11 +96,11 @@ void Subfactory::updateIngredients() {
                 }
 
                 if (!exists) {
-                    ingredients_.push_back(std::make_shared<data::Item>(line_ingredient));
+                    ingredients_.emplace_back(std::make_shared<ProductTarget>(line_ingredient));
                 }
 
             } else {
-                ingredients_.push_back(std::make_shared<data::Item>(line_ingredient));
+                ingredients_.emplace_back(std::make_shared<ProductTarget>(line_ingredient));
             }
 
         }
@@ -120,7 +123,7 @@ void Subfactory::updateByproducts() {
     std::vector<data::Item> all_byproducts;
     for (const auto &line : product_lines_) {
         for (const auto &line_prod : line.calcProducts()) {
-            if (line_prod != *line.target()) {
+            if (line_prod != line.target()->target()) {
                 if (all_byproducts.empty()) {
                     all_byproducts.emplace_back(line_prod);
                 } else {

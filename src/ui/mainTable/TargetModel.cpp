@@ -14,7 +14,7 @@
 
 namespace ui {
 
-TargetModel::TargetModel(std::shared_ptr<data::Library> db, std::shared_ptr<plan::Subfactory> subfactory, QObject *parent) :
+TargetModel::TargetModel(std::shared_ptr<data::Library> db, plan::Subfactory_Ptr subfactory, QObject *parent) :
         db_(std::move(db)),
         subfactory_(std::move(subfactory)),
         QAbstractTableModel(parent) {
@@ -37,7 +37,7 @@ QVariant TargetModel::headerData(int section, Qt::Orientation orientation, int r
 }
 
 QVariant TargetModel::data(const QModelIndex &index, int role) const {
-    const auto target = subfactory_->targets_.at(index.row());
+    const auto target = (*subfactory_)->targets_.at(index.row());
     const auto column = static_cast<Column> (index.column());
 
     if (role == Qt::ItemDataRole::DisplayRole) {
@@ -56,9 +56,9 @@ QVariant TargetModel::data(const QModelIndex &index, int role) const {
         }
 
     } else if (role == Qt::ItemDataRole::ForegroundRole) {
-		if (!subfactory_->isTarget(target)) {
+		if (!(*subfactory_)->isTarget(target)) {
 			return QColor(Qt::darkGray);
-		} else if (subfactory_->targetRemainder(target) > 0) {
+		} else if ((*subfactory_)->targetRemainder(target) > 0) {
 			return QColor(Qt::yellow);
 		}
 
@@ -73,7 +73,7 @@ QVariant TargetModel::data(const QModelIndex &index, int role) const {
 
 bool TargetModel::setData(const QModelIndex& index, const QVariant& value, int role) {
 	const auto column = static_cast<Column> (index.column());
-	const auto target = subfactory_->targets_.at(index.row());
+	const auto target = (*subfactory_)->targets_.at(index.row());
 	bool success = false;
 
 	if (role == Qt::ItemDataRole::EditRole) {
@@ -101,31 +101,31 @@ Qt::ItemFlags TargetModel::flags(const QModelIndex& index) const {
 	}
 }
 
-bool TargetModel::insertRows(int startRow, const QModelIndex &parent, const std::shared_ptr<data::Item>& new_target) {
+bool TargetModel::insertRows(int startRow, const QModelIndex &parent, const std::shared_ptr<plan::ProductTarget>& new_target) {
     beginInsertRows(parent, startRow, startRow);
 
-    subfactory_->targets_.push_back(new_target);
+    (*subfactory_)->targets_.emplace_back(new_target);
 
     endInsertRows();
     return true;
 }
 
 bool TargetModel::removeRows(int startRow, int count, const QModelIndex &parent) {
-    if (count == 0 || subfactory_->targets_.size() <= 1) {
+    if (count == 0 || (*subfactory_)->targets_.size() <= 1) {
         return false;
     }
 
     const int endRow = startRow + count - 1;
     beginRemoveRows(parent, startRow, endRow);
-    subfactory_->targets_.erase(subfactory_->targets_.begin() + startRow,
-                               subfactory_->targets_.begin() + (endRow + 1));
+    (*subfactory_)->targets_.erase((*subfactory_)->targets_.begin() + startRow,
+                               (*subfactory_)->targets_.begin() + (endRow + 1));
     endRemoveRows();
 
     return true;
 }
 
-std::shared_ptr<data::Item> TargetModel::getTarget(const QModelIndex &index) const {
-    return subfactory_->targets_.at(index.row());
+std::shared_ptr<plan::ProductTarget> TargetModel::getTarget(const QModelIndex &index) const {
+    return (*subfactory_)->targets_.at(index.row());
 }
 
 void TargetModel::refreshModel() {

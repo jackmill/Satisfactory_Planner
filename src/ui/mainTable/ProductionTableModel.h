@@ -20,7 +20,7 @@ namespace ui {
 class ProductionTableModel final : public QAbstractTableModel {
     Q_OBJECT
   public:
-    explicit ProductionTableModel(std::shared_ptr<plan::Subfactory> subfactory, std::shared_ptr<data::Library> db, QObject* parent = nullptr);
+    explicit ProductionTableModel(plan::Subfactory_Ptr subfactory, std::shared_ptr<data::Library> db, QObject* parent = nullptr);
 
     [[nodiscard]] int rowCount(const QModelIndex &parent) const final;
     [[nodiscard]] int columnCount(const QModelIndex &parent) const final { return static_cast<int> (Column::Ingredients) + 1; };
@@ -31,7 +31,7 @@ class ProductionTableModel final : public QAbstractTableModel {
 
     bool insertRows(int startRow, const QModelIndex &parent, plan::ProductLine product_line);
     bool removeRows(int startRow, int count, const QModelIndex &parent) final;
-    [[nodiscard]] std::shared_ptr<data::Item> getRowTarget(const QModelIndex &index) const;
+    [[nodiscard]] std::shared_ptr<plan::ProductTarget> getRowTarget(const QModelIndex &index) const;
 
     void refreshModel();
 
@@ -48,7 +48,7 @@ class ProductionTableModel final : public QAbstractTableModel {
     };
 
   private:
-    std::shared_ptr<plan::Subfactory> subfactory_;
+    plan::Subfactory_Ptr subfactory_;
     std::shared_ptr<data::Library> db_;
 
     [[nodiscard]] static QVariant ingredientData(int col_index, const plan::ProductLine &product_line);

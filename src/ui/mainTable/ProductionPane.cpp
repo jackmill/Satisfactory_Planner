@@ -8,6 +8,7 @@
  */
 
 #include <QPushButton>
+#include <utility>
 
 #include "ProductionPane.h"
 #include "recipeSelectDialog/ProductLineEditDialog.h"
@@ -19,9 +20,9 @@
 
 namespace ui {
 
-ProductionPane::ProductionPane(std::shared_ptr<plan::Subfactory> subfactory, std::shared_ptr<data::Library> db,
+ProductionPane::ProductionPane(const std::shared_ptr<plan::Subfactory>& subfactory, std::shared_ptr<data::Library> db,
                                QWidget *parent) :
-                         subfactory_(std::move(subfactory)),
+                         subfactory_(std::make_shared<std::shared_ptr<plan::Subfactory>>(subfactory)),
                          db_(std::move(db)),
                          QWidget(parent) {
     assert(subfactory_);
@@ -45,6 +46,8 @@ ProductionPane::ProductionPane(std::shared_ptr<plan::Subfactory> subfactory, std
 
     layout_->addWidget(header_);
     layout_->addWidget(production_table_);
+
+	resizeAll();
 }
 
 void ProductionPane::initActions() {
@@ -79,6 +82,13 @@ void ProductionPane::initActions() {
             &QAction::triggered,
             this,
             [&] { S_addToTable(ingredients_model_->getTarget(ingredients_->selectionModel()->currentIndex())); });
+	
+	if ((*subfactory_)->targets_.empty()) {
+		actions_.target_act_add_to_table->setEnabled(false);
+		actions_.target_act_edit->setEnabled(false);
+		actions_.target_act_del->setEnabled(false);
+		actions_.target_act_new->setEnabled(true);
+	}
 }
 
 void ProductionPane::initTargets() {
@@ -119,7 +129,7 @@ void ProductionPane::initByproducts() {
     byproducts_layout_ = new QVBoxLayout(byproducts_widget_);
 
     byproducts_ = new QTableView(byproducts_widget_);
-    byproducts_model_ = new SubfacItemListModel(subfactory_->byproducts_, byproducts_widget_);
+    byproducts_model_ = new SubfacItemListModel((*subfactory_)->byproducts_, byproducts_widget_);
     byproducts_->setModel(byproducts_model_);
     byproducts_->setSelectionMode(QAbstractItemView::NoSelection);
 
@@ -132,7 +142,7 @@ void ProductionPane::initIngredients() {
     ingredients_layout_ = new QVBoxLayout(ingredients_widget_);
 
     ingredients_ = new QTableView(ingredients_widget_);
-    ingredients_model_ = new SubfacItemListModel(subfactory_->ingredientsNotOnTable(), ingredients_widget_);
+    ingredients_model_ = new SubfacItemListModel((*subfactory_)->ingredientsNotOnTable(), ingredients_widget_);
     ingredients_->setModel(ingredients_model_);
     ingredients_->setSelectionBehavior(QAbstractItemView::SelectRows);
 
@@ -180,6 +190,12 @@ void ProductionPane::resizeAll() {
     ingredients_->resizeColumnsToContents();
 }
 
+void ProductionPane::changeSubfactory(std::shared_ptr<plan::Subfactory> subfactory) {
+	*subfactory_ = std::move(subfactory);
+
+	S_refreshAll();
+}
+
 void ProductionPane::S_addNewTarget() {
     auto *dialog = new ItemSelectionDialog(db_, this);
     if (dialog->exec() == QDialog::Accepted) {
@@ -187,15 +203,17 @@ void ProductionPane::S_addNewTarget() {
 
         // Check that this isn't a duplicate target
         bool duplicate = false;
-        for (auto &existing_item : subfactory_->targets_) {
-            if (new_target == *existing_item) {
+        for (auto &existing_item : (*subfactory_)->targets_) {
+            if (new_target == existing_item->target()) {
                 existing_item->setRate(existing_item->rate() + new_target.rate());
                 duplicate = true;
             }
         }
 
         if (!duplicate) {
-            targets_model_->insertRows(targets_model_->rowCount(QModelIndex()), QModelIndex(), std::make_shared<data::Item> (new_target));
+            targets_model_->insertRows(targets_model_->rowCount(QModelIndex()),
+									   QModelIndex(),
+									   std::make_shared<plan::ProductTarget> (new_target));
         }
 
         targets_->resizeColumnsToContents();
@@ -204,17 +222,17 @@ void ProductionPane::S_addNewTarget() {
 }
 
 void ProductionPane::S_editTarget(const QModelIndex &index) {
-    std::shared_ptr<data::Item> item = targets_model_->getTarget(index);
-    auto* dialog = new ItemSelectionDialog(*item, db_, this);
-	dialog->allowItemChange(!subfactory_->isTarget(item));
+    std::shared_ptr<plan::ProductTarget> item = targets_model_->getTarget(index);
+    auto* dialog = new ItemSelectionDialog(item->target(), db_, this);
+	dialog->allowItemChange(!(*subfactory_)->isTarget(item));
     if (dialog->exec() == QDialog::Accepted) {
         data::Item new_target = dialog->getSelectedItem();
 
         // If we're creating a duplicate target, add the edited rate to the existing and get rid of the duplicate
         bool duplicate = false;
-        for (auto existing_item = subfactory_->targets_.cbegin(); existing_item != subfactory_->targets_.cend(); ++existing_item) {
-            if (new_target == **existing_item &&
-                index.row() != std::distance(subfactory_->targets_.cbegin(), existing_item)) {
+        for (auto existing_item = (*subfactory_)->targets_.cbegin(); existing_item != (*subfactory_)->targets_.cend(); ++existing_item) {
+            if (new_target == (*existing_item)->target() &&
+                index.row() != std::distance((*subfactory_)->targets_.cbegin(), existing_item)) {
                 duplicate = true;
                 (*existing_item)->setRate((*existing_item)->rate() + new_target.rate());
                 targets_model_->removeRows(index.row(), 1, QModelIndex());
@@ -225,7 +243,7 @@ void ProductionPane::S_editTarget(const QModelIndex &index) {
             item->replaceWith(new_target);
         }
 
-        if (subfactory_->isTarget(item)) {
+        if ((*subfactory_)->isTarget(item)) {
 			Q_EMIT(targets_model_->dataChanged(index, index));
         }
 
@@ -236,13 +254,13 @@ void ProductionPane::S_editTarget(const QModelIndex &index) {
 
 void ProductionPane::S_removeTarget(const QModelIndex& index) {
     // Find and eliminate the product line that the product is tied to
-    if (!subfactory_->product_lines_.empty()) {
-        auto target_item = subfactory_->targets_.at(index.row());
-        for (auto product_line = subfactory_->product_lines_.cbegin();
-             product_line != subfactory_->product_lines_.cend();
+    if (!(*subfactory_)->product_lines_.empty()) {
+        auto target_item = (*subfactory_)->targets_.at(index.row());
+        for (auto product_line = (*subfactory_)->product_lines_.cbegin();
+             product_line != (*subfactory_)->product_lines_.cend();
              ++product_line) {
             if (target_item == product_line->target()) {
-                subfactory_->product_lines_.erase(product_line);
+                (*subfactory_)->product_lines_.erase(product_line);
             }
         }
         table_model_->refreshModel();
@@ -252,13 +270,13 @@ void ProductionPane::S_removeTarget(const QModelIndex& index) {
     targets_model_->removeRows(index.row(), 1, QModelIndex());
 
     // Refresh the rest of the table
-    ingredients_model_->refreshModel(subfactory_->ingredientsNotOnTable());
+    ingredients_model_->refreshModel((*subfactory_)->ingredientsNotOnTable());
 }
 
-void ProductionPane::S_addToTable(std::shared_ptr<data::Item> target) {
+void ProductionPane::S_addToTable(std::shared_ptr<plan::ProductTarget> target) {
     // TODO: Split target lines -- lines with the same target need to sum to 100%
-	if (subfactory_->targetRemainder(target) > 0) {
-        const auto recipes = db_->FindRecipes(*target);
+	if ((*subfactory_)->targetRemainder(target) > 0) {
+        const auto recipes = db_->FindRecipes(target->target());
         bool added_to_table = false;
 
         // If there's only one recipe to choose, just select that one
@@ -291,18 +309,18 @@ void ProductionPane::S_addToTable(std::shared_ptr<data::Item> target) {
 }
 
 void ProductionPane::S_refreshAll() {
-	subfactory_->calculate();
+	(*subfactory_)->calculate();
 
 	targets_model_->refreshModel();
 	table_model_->refreshModel();
 	byproducts_model_->refreshModel();
-	ingredients_model_->refreshModel(subfactory_->ingredientsNotOnTable());
+	ingredients_model_->refreshModel((*subfactory_)->ingredientsNotOnTable());
 
 	resizeAll();
 }
 
 void ProductionPane::S_targetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
-	if (selected.empty()) {
+	if (selected.empty() || (*subfactory_)->targets_.empty()) {
 		actions_.target_act_add_to_table->setEnabled(false);
 		actions_.target_act_edit->setEnabled(false);
 		actions_.target_act_del->setEnabled(false);
@@ -311,7 +329,7 @@ void ProductionPane::S_targetSelectionChanged(const QItemSelection& selected, co
 	}
 
 	const auto selected_target = targets_model_->getTarget(selected.indexes().at(0));
-	if (subfactory_->isTarget(selected_target)) {
+	if ((*subfactory_)->isTarget(selected_target)) {
 		actions_.target_act_add_to_table->setEnabled(false);
 		actions_.target_act_del->setEnabled(false);
 		actions_.target_act_edit->setEnabled(true);

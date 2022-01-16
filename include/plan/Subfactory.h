@@ -12,7 +12,7 @@
 
 #include <string>
 #include <vector>
-
+#include <memory>
 
 #include "ProductLine.h"
 #include "data/Library.h"
@@ -33,20 +33,20 @@ class Subfactory {
     void setIcon(std::string icon_string) { icon_string_ = std::move(icon_string); };
 
     void addProductLine(const ProductLine& product_line);
-    void addTarget(const std::shared_ptr<data::Item> &target_product);
-    [[nodiscard]] float targetRemainder(const std::shared_ptr<data::Item>& target) const;
+    void addTarget(const std::shared_ptr<ProductTarget>& target_product);
+    [[nodiscard]] float targetRemainder(const std::shared_ptr<ProductTarget>& target) const;
     [[nodiscard]] float powerDraw() const { return power_draw_; };
-    [[nodiscard]] bool isTarget(const std::shared_ptr<data::Item>& item) const;
-    [[nodiscard]] std::vector<std::shared_ptr<data::Item>> ingredientsNotOnTable() const;
+    [[nodiscard]] bool isTarget(const std::shared_ptr<ProductTarget>& item) const;
+    [[nodiscard]] std::vector<std::shared_ptr<ProductTarget>> ingredientsNotOnTable() const;
 
     void updateByproducts();
     void updateIngredients();
     void calculate();
     void validate();
 
-    std::vector<std::shared_ptr<data::Item>> targets_;
-    std::vector<std::shared_ptr<data::Item>> byproducts_;
-    std::vector<std::shared_ptr<data::Item>> ingredients_;
+    std::vector<std::shared_ptr<ProductTarget>> targets_;
+    std::vector<std::shared_ptr<ProductTarget>> byproducts_;
+    std::vector<std::shared_ptr<ProductTarget>> ingredients_;
     std::vector<ProductLine> product_lines_;
 
   private:
@@ -55,6 +55,8 @@ class Subfactory {
 
     float power_draw_ = 0.0;
 };
+
+using Subfactory_Ptr = std::shared_ptr<std::shared_ptr<Subfactory>>;
 
 } // namespace plan
 

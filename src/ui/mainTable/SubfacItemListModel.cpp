@@ -12,9 +12,9 @@
 
 namespace ui {
 
-SubfacItemListModel::SubfacItemListModel(std::vector<std::shared_ptr<data::Item>> list, QObject *parent) :
-    item_list(std::move(list)),
-    QAbstractTableModel(parent) {
+SubfacItemListModel::SubfacItemListModel(std::vector<std::shared_ptr<plan::ProductTarget>> list, QObject *parent) :
+	QAbstractTableModel(parent),
+	item_list_(std::move(list)) {
 
 }
 
@@ -33,7 +33,7 @@ QVariant SubfacItemListModel::headerData(int section, Qt::Orientation orientatio
 }
 
 QVariant SubfacItemListModel::data(const QModelIndex &index, int role) const {
-    const auto& item = item_list.at(index.row());
+    const auto& item = item_list_.at(index.row());
     const auto column = static_cast<Column> (index.column());
 
     if (role == Qt::ItemDataRole::DisplayRole) {
@@ -56,14 +56,14 @@ void SubfacItemListModel::refreshModel() {
     endResetModel();
 }
 
-void SubfacItemListModel::refreshModel(std::vector<std::shared_ptr<data::Item>> new_list) {
-    item_list.clear();
-    item_list = std::move(new_list);
+void SubfacItemListModel::refreshModel(std::vector<std::shared_ptr<plan::ProductTarget>> new_list) {
+    item_list_.clear();
+	item_list_ = std::move(new_list);
     refreshModel();
 }
 
-std::shared_ptr<data::Item> SubfacItemListModel::getTarget(const QModelIndex& index) const {
-    return item_list.at(index.row());
+std::shared_ptr<plan::ProductTarget> SubfacItemListModel::getTarget(const QModelIndex& index) const {
+    return item_list_.at(index.row());
 }
 
 }
