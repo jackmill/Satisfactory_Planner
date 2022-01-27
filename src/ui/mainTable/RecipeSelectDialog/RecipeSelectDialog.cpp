@@ -1,6 +1,6 @@
 /**
  * @project Satisfactory_Planner
- * @file ProductLineEditDialog.cpp
+ * @file RecipeSelectDialog.cpp
  * 
  * @author Jackson Miller
  * @date 2021-11-03
@@ -9,12 +9,12 @@
 
 #include <QMouseEvent>
 
-#include "ProductLineEditDialog.h"
+#include "RecipeSelectDialog.h"
 #include "RecipeIconDelegate.h"
 
 namespace ui {
 
-ProductLineEditDialog::ProductLineEditDialog(std::vector<data::Recipe> recipes, QWidget *parent) :
+RecipeSelectDialog::RecipeSelectDialog(std::vector<data::Recipe> recipes, QWidget *parent) :
     recipes_(std::move(recipes)),
     QDialog(parent) {
 
@@ -44,8 +44,8 @@ ProductLineEditDialog::ProductLineEditDialog(std::vector<data::Recipe> recipes, 
 	recipe_table_->resizeRowsToContents();
 
     actions_ = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-    connect(actions_, &QDialogButtonBox::accepted, this, &ProductLineEditDialog::accept);
-    connect(actions_, &QDialogButtonBox::rejected, this, &ProductLineEditDialog::reject);
+    connect(actions_, &QDialogButtonBox::accepted, this, &RecipeSelectDialog::accept);
+    connect(actions_, &QDialogButtonBox::rejected, this, &RecipeSelectDialog::reject);
 
     layout_->addWidget(recipe_table_);
     layout_->addWidget(actions_);
@@ -53,7 +53,7 @@ ProductLineEditDialog::ProductLineEditDialog(std::vector<data::Recipe> recipes, 
 	setMinimumWidth(tableWidth());
 }
 
-data::Recipe ProductLineEditDialog::getSelectedRecipe() {
+data::Recipe RecipeSelectDialog::getSelectedRecipe() {
     if (recipe_table_->selectionModel()->hasSelection()) {
         return recipe_model_->getSelectedRecipe(recipe_table_->selectionModel()->currentIndex());
     } else {
@@ -72,7 +72,7 @@ data::Recipe ProductLineEditDialog::getSelectedRecipe() {
     }
 }
 
-int ProductLineEditDialog::tableWidth() const {
+int RecipeSelectDialog::tableWidth() const {
 	int table_width = 0;
 
 	for (int col = 0; col < RecipeSelectModel::column_count_; ++col) {

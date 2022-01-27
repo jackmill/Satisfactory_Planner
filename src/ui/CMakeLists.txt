@@ -28,10 +28,13 @@ add_executable(${PROJECT_NAME}
         mainTable/IconListDelegate.cpp
         mainTable/IngredientIconList.cpp
 
-        mainTable/recipeSelectDialog/ProductLineEditDialog.cpp
-        mainTable/recipeSelectDialog/RecipeSelectModel.cpp
-        mainTable/recipeSelectDialog/RecipeIconList.cpp
-        mainTable/recipeSelectDialog/RecipeIconDelegate.cpp
+        mainTable/RecipeSelectDialog/RecipeSelectDialog.cpp
+        mainTable/RecipeSelectDialog/RecipeSelectModel.cpp
+        mainTable/RecipeSelectDialog/RecipeIconList.cpp
+        mainTable/RecipeSelectDialog/RecipeIconDelegate.cpp
+
+        mainTable/PercentEditDialog/PercentEditDialog.cpp
+        mainTable/ClockSpeedEditDialog/ClockSpeedEditDialog.cpp
 
         subfactoryPane/SubfactoryPane.cpp
         subfactoryPane/SubfactoryInfo.cpp

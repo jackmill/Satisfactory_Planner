@@ -86,6 +86,8 @@ class ProductionPane final : public QWidget {
     void S_addToTable(std::shared_ptr<plan::ProductTarget> target);
 	void S_refreshAll();
 	void S_targetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void S_editPercent(const QModelIndex& index);
+	void S_editClockSpeed(const QModelIndex& index);
 
   Q_SIGNALS:
     void S_factoryChanged();

@@ -8,6 +8,7 @@
  */
 
 #include <QDoubleSpinBox>
+#include <QPushButton>
 
 #include "SpinBoxDelegate.h"
 #include "ProductionTableModel.h"

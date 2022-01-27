@@ -41,6 +41,7 @@ class Subfactory {
 
     void updateByproducts();
     void updateIngredients();
+	void checkTargetCompletion();
     void calculate();
     void validate();
 

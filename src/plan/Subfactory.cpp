@@ -65,7 +65,6 @@ std::vector<std::shared_ptr<ProductTarget>> Subfactory::ingredientsNotOnTable() 
     std::vector<std::shared_ptr<ProductTarget>> out;
 
     for (const auto& ingredient : ingredients_) {
-        // TODO: Allow separation of ingredient-targeted product lines
 		if (!isTarget(ingredient)) {
 			out.push_back(ingredient);
         }
@@ -217,12 +216,24 @@ void Subfactory::updateIngredients() {
 }
 */
 
+void Subfactory::checkTargetCompletion() {
+	for (auto& target : targets_) {
+		target->setCompletion(0);
+		for (const auto& line : product_lines_) {
+			if (target == line.target()) {
+				target->setCompletion(target->completion() + line.percent());
+			}
+		}
+	}
+}
+
 void Subfactory::calculate() {
     for (auto& line : product_lines_) {
         line.calculate();
     }
     updateIngredients();
     updateByproducts();
+	checkTargetCompletion();
 
 
     do {

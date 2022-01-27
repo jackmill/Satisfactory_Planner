@@ -27,6 +27,8 @@ class ProductTarget {
 	[[nodiscard]] data::Item target() const { return target_item_; };
 	[[nodiscard]] std::string name() const { return target_item_.name(); };
 	[[nodiscard]] std::string className() const { return target_item_.className(); };
+	[[nodiscard]] float completion() const { return completion_; };
+	void setCompletion(float comp) { completion_ = comp; };
 
 	[[nodiscard]] int amount() const { return target_item_.amount(); };
 	[[nodiscard]] float rate() const { return target_item_.rate(); };
@@ -38,6 +40,7 @@ class ProductTarget {
   private:
 	uuids::uuid id_;
     data::Item target_item_;
+	float completion_ = 0.0;
 };
 
 } // namespace plan

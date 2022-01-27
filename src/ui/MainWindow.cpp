@@ -56,27 +56,27 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::InitActions() {
     // File
-    actions_.act_file_new = new QAction(tr("&New"), this);
+    actions_.act_file_new = new QAction(QIcon::fromTheme("document-new"), tr("&New"), this);
     actions_.act_file_new->setShortcut(QKeySequence::New);
     connect(actions_.act_file_new, &QAction::triggered, this, &MainWindow::S_fileNew);
 
     // Save
-    actions_.act_file_save = new QAction(tr("&Save"), this);
+    actions_.act_file_save = new QAction(QIcon::fromTheme("document-save"), tr("&Save"), this);
     actions_.act_file_save->setShortcut(QKeySequence::Save);
     connect(actions_.act_file_save, &QAction::triggered, this, &MainWindow::S_fileSave);
 
     // Save As
-    actions_.act_file_save_as = new QAction(tr("Save &As"), this);
+    actions_.act_file_save_as = new QAction(QIcon::fromTheme("document-save-as"), tr("Save &As"), this);
     actions_.act_file_save_as->setShortcut(QKeySequence::SaveAs);
     connect(actions_.act_file_save_as, &QAction::triggered, this, &MainWindow::S_fileSaveAs);
 
     // Open
-    actions_.act_file_open = new QAction(tr("&Open"), this);
+    actions_.act_file_open = new QAction(QIcon::fromTheme("document-open"), tr("&Open"), this);
     actions_.act_file_open->setShortcut(QKeySequence::Open);
     connect(actions_.act_file_open, &QAction::triggered, this, &MainWindow::S_fileOpen);
 
 	// Data Source
-	actions_.act_data_source = new QAction(tr("Select &Data Source..."), this);
+	actions_.act_data_source = new QAction(QIcon::fromTheme("document-properties"), tr("Select &Data Source..."), this);
 	connect(actions_.act_data_source, &QAction::triggered, this, &MainWindow::S_dataSource);
 	
     // Quit
@@ -85,7 +85,7 @@ void MainWindow::InitActions() {
     connect(actions_.act_quit, &QAction::triggered, this, &MainWindow::close);
 
     // About
-    actions_.act_help = new QAction(tr("&About"), this);
+    actions_.act_help = new QAction(QIcon::fromTheme("help-about"), tr("&About"), this);
     connect(actions_.act_help, &QAction::triggered, this, &MainWindow::S_about);
 
     //About Qt
@@ -100,7 +100,7 @@ void MainWindow::InitMenu() {
     menu_file->addAction(actions_.act_file_save);
     menu_file->addAction(actions_.act_file_save_as);
     menu_file->addAction(actions_.act_file_open);
-	actions_.menu_recent_files = menu_file->addMenu(tr("&Recent Files"));
+	actions_.menu_recent_files = menu_file->addMenu(QIcon::fromTheme("document-open-recent"), tr("&Recent Files"));
 	updateRecents();
     menu_file->addSeparator();
 	menu_file->addAction(actions_.act_data_source);

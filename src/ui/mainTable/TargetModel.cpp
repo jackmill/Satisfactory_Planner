@@ -58,8 +58,10 @@ QVariant TargetModel::data(const QModelIndex &index, int role) const {
     } else if (role == Qt::ItemDataRole::ForegroundRole) {
 		if (!(*subfactory_)->isTarget(target)) {
 			return QColor(Qt::darkGray);
-		} else if ((*subfactory_)->targetRemainder(target) > 0) {
+		} else if (target->completion() < 100) {
 			return QColor(Qt::yellow);
+		} else if (target->completion() > 100) {
+			return QColor(Qt::red);
 		}
 
 	} else if (role == Qt::ItemDataRole::EditRole) {

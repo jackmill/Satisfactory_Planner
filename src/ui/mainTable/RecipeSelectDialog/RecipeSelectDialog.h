@@ -1,14 +1,14 @@
 /**
  * @project Satisfactory_Planner
- * @file ProductLineEditDialog.h
+ * @file RecipeSelectDialog.h
  * 
  * @author Jackson Miller
  * @date 2021-11-03
  * @copyright (c) 2021 Jackson Miller
  */
 
-#ifndef SATISFACTORY_PLANNER_PRODUCTLINEEDITDIALOG_H
-#define SATISFACTORY_PLANNER_PRODUCTLINEEDITDIALOG_H
+#ifndef SATISFACTORY_PLANNER_RECIPESELECTDIALOG_H
+#define SATISFACTORY_PLANNER_RECIPESELECTDIALOG_H
 
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -20,10 +20,10 @@
 
 namespace ui {
 
-class ProductLineEditDialog : public QDialog {
+class RecipeSelectDialog : public QDialog {
     Q_OBJECT
   public:
-    explicit ProductLineEditDialog(std::vector<data::Recipe> recipes, QWidget* parent = nullptr);
+    explicit RecipeSelectDialog(std::vector<data::Recipe> recipes, QWidget* parent = nullptr);
 
     data::Recipe getSelectedRecipe();
 
@@ -42,4 +42,4 @@ class ProductLineEditDialog : public QDialog {
 
 }
 
-#endif //SATISFACTORY_PLANNER_PRODUCTLINEEDITDIALOG_H
+#endif //SATISFACTORY_PLANNER_RECIPESELECTDIALOG_H

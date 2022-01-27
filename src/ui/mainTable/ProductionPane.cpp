@@ -11,7 +11,9 @@
 #include <utility>
 
 #include "ProductionPane.h"
-#include "recipeSelectDialog/ProductLineEditDialog.h"
+#include "RecipeSelectDialog/RecipeSelectDialog.h"
+#include "PercentEditDialog/PercentEditDialog.h"
+#include "ClockSpeedEditDialog/ClockSpeedEditDialog.h"
 #include "../elements/ItemSelectionDialog.h"
 #include "../elements/TableIcon.h"
 #include "SpinBoxDelegate.h"
@@ -173,6 +175,19 @@ void ProductionPane::initTable() {
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::ClockSpeed),
 	                                            clock_speed_delegate);
 
+	// Double-click to open a window to edit the spinbox
+	connect(production_table_,
+			&QTableView::doubleClicked,
+			this,
+			[this] {
+		const QModelIndex selected = production_table_->selectionModel()->currentIndex();
+		if (selected.column() == static_cast<int>(ProductionTableModel::Column::Percentage)) {
+			S_editPercent(selected);
+		} else if (selected.column() == static_cast<int>(ProductionTableModel::Column::ClockSpeed)) {
+			S_editClockSpeed(selected);
+		}
+	});
+
 	auto* ingredients_delegate = new IconListDelegate(subfactory_, this);
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Ingredients),
 												ingredients_delegate);
@@ -274,28 +289,32 @@ void ProductionPane::S_removeTarget(const QModelIndex& index) {
 }
 
 void ProductionPane::S_addToTable(std::shared_ptr<plan::ProductTarget> target) {
-    // TODO: Split target lines -- lines with the same target need to sum to 100%
 	if ((*subfactory_)->targetRemainder(target) > 0) {
         const auto recipes = db_->FindRecipes(target->target());
         bool added_to_table = false;
+		float new_line_percent = 100 - target->completion();
 
         // If there's only one recipe to choose, just select that one
         if (recipes.size() == 1) {
-            table_model_->insertRows(table_model_->rowCount(QModelIndex()),
+			auto new_line = plan::ProductLine(std::move(target), recipes.at(0));
+			new_line.setPercent(new_line_percent);
+
+			table_model_->insertRows(table_model_->rowCount(QModelIndex()),
                                      QModelIndex(),
-                                     plan::ProductLine(std::move(target), recipes.at(0)));
-            production_table_->setRowHeight(table_model_->rowCount(QModelIndex()), ui::TableIcon::kSize_.height());
+                                     new_line);
 			added_to_table = true;
         }
 
         // If there's more than one, prompt user to choose recipe
         if (!added_to_table) {
-            auto *dialog = new ProductLineEditDialog(recipes);
+            auto *dialog = new RecipeSelectDialog(recipes);
             if (dialog->exec() == QDialog::Accepted) {
-                table_model_->insertRows(table_model_->rowCount(QModelIndex()),
+				auto new_line = plan::ProductLine(std::move(target), dialog->getSelectedRecipe());
+	            new_line.setPercent(new_line_percent);
+
+				table_model_->insertRows(table_model_->rowCount(QModelIndex()),
                                          QModelIndex(),
-                                         plan::ProductLine(std::move(target), dialog->getSelectedRecipe()));
-	            production_table_->setRowHeight(table_model_->rowCount(QModelIndex()), ui::TableIcon::kSize_.height());
+                                         new_line);
 				added_to_table = true;
             }
             dialog->deleteLater();
@@ -330,7 +349,11 @@ void ProductionPane::S_targetSelectionChanged(const QItemSelection& selected, co
 
 	const auto selected_target = targets_model_->getTarget(selected.indexes().at(0));
 	if ((*subfactory_)->isTarget(selected_target)) {
-		actions_.target_act_add_to_table->setEnabled(false);
+		if (selected_target->completion() == 100.0) {
+			actions_.target_act_add_to_table->setEnabled(false);
+		} else {
+			actions_.target_act_add_to_table->setEnabled(true);
+		}
 		actions_.target_act_del->setEnabled(false);
 		actions_.target_act_edit->setEnabled(true);
 		actions_.target_act_new->setEnabled(true);
@@ -342,6 +365,24 @@ void ProductionPane::S_targetSelectionChanged(const QItemSelection& selected, co
 		actions_.target_act_new->setEnabled(true);
 		return;
 	}
+}
+
+void ProductionPane::S_editPercent(const QModelIndex& index) {
+	auto* dialog = new PercentEditDialog((*subfactory_)->product_lines_.at(index.row()), this);
+	if (dialog->exec() == QDialog::Accepted) {
+		(*subfactory_)->product_lines_.at(index.row()).setPercent(dialog->selectedPercent());
+		S_refreshAll();
+	}
+	dialog->deleteLater();
+}
+
+void ProductionPane::S_editClockSpeed(const QModelIndex& index) {
+	auto* dialog = new ClockSpeedEditDialog((*subfactory_)->product_lines_.at(index.row()), this);
+	if (dialog->exec() == QDialog::Accepted) {
+		(*subfactory_)->product_lines_.at(index.row()).setClock(dialog->getNewMult());
+		S_refreshAll();
+	}
+	dialog->deleteLater();
 }
 
 }

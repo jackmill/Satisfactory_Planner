@@ -12,6 +12,8 @@
 
 #include <QStyledItemDelegate>
 
+#include "plan/Subfactory.h"
+
 namespace ui {
 
 class SpinBoxDelegate final : public QStyledItemDelegate {

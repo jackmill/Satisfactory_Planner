@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "ProductionTableModel.h"
-#include "recipeSelectDialog/ProductLineEditDialog.h"
+#include "RecipeSelectDialog/RecipeSelectDialog.h"
 #include "../util.h"
 
 namespace ui {

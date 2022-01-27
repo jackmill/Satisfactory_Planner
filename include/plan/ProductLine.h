@@ -34,20 +34,22 @@ class ProductLine {
 	[[nodiscard]] float multiplier() const { return multiplier_; };
 	[[nodiscard]] data::Recipe recipe() const { return recipe_; };
 
-	void setDone(bool done) { complete_ = done; };
+	void setDone(bool b) { complete_ = b; };
 	[[nodiscard]] bool isDone() const { return complete_; };
     [[nodiscard]] float calcPower() const;
     [[nodiscard]] float power() const { return power_; };
 	[[nodiscard]] float clock() const { return clock_speed_ * 100; };
-	void setClock(float clock_speed) { clock_speed_ = clock_speed / 100; };
+	void setClock(float d) { clock_speed_ = d / 100; };
 	[[nodiscard]] float percent() const { return percentage_ * 100; };
-	void setPercent(float percentage) { percentage_ = percentage / 100; };
+	void setPercent(float d) { percentage_ = d / 100; };
 
     [[nodiscard]] std::vector<data::Item> calcIngredients() const;
     [[nodiscard]] std::vector<data::Item> ingredients() const { return ingredients_; };
     [[nodiscard]] std::vector<data::Item> calcProducts() const;
     [[nodiscard]] data::Item byproduct() const { return byproduct_.value(); };
     [[nodiscard]] bool hasByproduct() const { return byproduct_.has_value(); };
+	[[nodiscard]] bool useByproduct() const { return use_byproduct_; };
+	void setUseByproduct(bool b) { use_byproduct_ = b; };
 
     void calculate();
     void update();
@@ -71,6 +73,7 @@ class ProductLine {
     float timing_coefficient_ = 1.0;
 
     bool valid_ = false;
+	bool use_byproduct_ = false;
 
     void calcRate(data::Item& item) const;
 };
