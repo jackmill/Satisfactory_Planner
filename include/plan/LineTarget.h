@@ -1,26 +1,28 @@
 /**
  * @project Satisfactory_Planner
- * @file ProductTarget.h
+ * @file LineTarget.h
  * 
  * @author Jackson Miller
  * @date 2022-01-15
  * @copyright (c) 2022 Jackson Miller
  */
 
-#ifndef SATISFACTORY_PLANNER_PRODUCTTARGET_H
-#define SATISFACTORY_PLANNER_PRODUCTTARGET_H
+#ifndef SATISFACTORY_PLANNER_LINETARGET_H
+#define SATISFACTORY_PLANNER_LINETARGET_H
 
 #include "uuid.h"
 #include "data/Item.h"
 
 namespace plan {
 
-class ProductTarget {
-	friend void to_json(nlohmann::json &json, const ProductTarget &product_target);
+class ProductLine;
+
+class LineTarget {
+	friend void to_json(nlohmann::json &json, const LineTarget &product_target);
 
   public:
-	explicit ProductTarget(const data::Item& target);
-	ProductTarget(uuids::uuid id, const data::Item& target);
+	explicit LineTarget(const data::Item& target);
+	LineTarget(uuids::uuid id, const data::Item& target);
 
 	[[nodiscard]] uuids::uuid id() const { return id_; };
 
@@ -37,12 +39,19 @@ class ProductTarget {
 
 	void replaceWith(const data::Item& rhs) { target_item_.replaceWith(rhs); };
 
+	[[nodiscard]] std::vector<uuids::uuid> associatedProductLines() const { return associated_product_lines_; };
+	void addProductLineReference(uuids::uuid contributor);
+	[[nodiscard]] bool isAssociated(const uuids::uuid& contributor) const;
+	void clearAssociated();
+
   private:
 	uuids::uuid id_;
     data::Item target_item_;
 	float completion_ = 0.0;
+
+	std::vector<uuids::uuid> associated_product_lines_;
 };
 
 } // namespace plan
 
-#endif //SATISFACTORY_PLANNER_PRODUCTTARGET_H
+#endif //SATISFACTORY_PLANNER_LINETARGET_H

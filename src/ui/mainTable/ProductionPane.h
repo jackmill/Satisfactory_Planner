@@ -19,7 +19,7 @@
 
 #include "ProductionTableModel.h"
 #include "SubfacItemListModel.h"
-#include "TargetModel.h"
+#include "ProductModel.h"
 
 #include "plan/Factory.h"
 
@@ -38,10 +38,10 @@ class ProductionPane final : public QWidget {
     plan::Subfactory_Ptr subfactory_;
     std::shared_ptr<data::Library> db_;
 
-    QGroupBox* targets_widget_ = nullptr;
-    QVBoxLayout* targets_layout_ = nullptr;
-    QTableView* targets_ = nullptr;
-    TargetModel* targets_model_ = nullptr;
+    QGroupBox* products_widget_ = nullptr;
+    QVBoxLayout* products_layout_ = nullptr;
+    QTableView* products_ = nullptr;
+    ProductModel* products_model_ = nullptr;
 
     QGroupBox* byproducts_widget_ = nullptr;
     QVBoxLayout* byproducts_layout_ = nullptr;
@@ -62,18 +62,53 @@ class ProductionPane final : public QWidget {
 
     struct Actions {
         // targets
-        QAction* target_act_new = nullptr;
-        QAction* target_act_add_to_table = nullptr;
-        QAction* target_act_edit = nullptr;
-        QAction* target_act_del = nullptr;
+        QAction* product_act_new = nullptr;
+        QAction* product_act_add_to_table = nullptr;
+        QAction* product_act_edit = nullptr;
+        QAction* product_act_del = nullptr;
 
         // ingredients
         QAction* ingredient_act_add_to_table = nullptr;
     };
 
-    Actions actions_;
+	struct ProdTableActions {
+		// Done
 
-    void initTargets();
+		// Product
+
+		// Recipe
+		QAction* recipe_change = nullptr;
+
+		// Percent
+		QAction* percent_edit = nullptr;
+
+		// Building
+
+		// Clock Speed
+		QAction* clock_edit = nullptr;
+
+		// Power
+
+		// Byproduct
+		QAction* byproduct_use = nullptr;
+
+		// Ingredients
+
+		// All Columns
+		QAction* delete_row = nullptr;
+
+		void setAllInvisible() const {
+			recipe_change->setVisible(false);
+			percent_edit->setVisible(false);
+			clock_edit->setVisible(false);
+			byproduct_use->setVisible(false);
+		}
+	};
+
+    Actions actions_;
+	ProdTableActions prod_table_actions_;
+
+    void initProducts();
     void initByproducts();
     void initIngredients();
     void initTable();
@@ -83,11 +118,14 @@ class ProductionPane final : public QWidget {
     void S_addNewTarget();
     void S_editTarget(const QModelIndex &index);
     void S_removeTarget(const QModelIndex& index);
-    void S_addToTable(std::shared_ptr<plan::ProductTarget> target);
+    void S_addToTable(std::shared_ptr<plan::LineTarget> target);
 	void S_refreshAll();
-	void S_targetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void S_productSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void S_prodTableContextMenu(const QModelIndex& index);
 	void S_editPercent(const QModelIndex& index);
 	void S_editClockSpeed(const QModelIndex& index);
+	void S_removeProductLine(const QModelIndex& index);
+	void S_changeProductLineRecipe(const QModelIndex& index);
 
   Q_SIGNALS:
     void S_factoryChanged();

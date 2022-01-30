@@ -21,10 +21,11 @@ void to_json(nlohmann::json &json, const ProductLine &product_line) {
 	json["percent"] = product_line.percentage_ * 100;
 }
 
-ProductLine::ProductLine(std::shared_ptr<ProductTarget> target, data::Recipe recipe) :
+ProductLine::ProductLine(std::shared_ptr<LineTarget> target, data::Recipe recipe) :
         target_(std::move(target)),
         recipe_(std::move(recipe)),
         multiplier_(1) {
+    id_ = uuids::uuid_system_generator{}();
     changeRecipe(recipe_);
 }
 

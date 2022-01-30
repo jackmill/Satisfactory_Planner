@@ -33,11 +33,41 @@ class Subfactory {
     void setIcon(std::string icon_string) { icon_string_ = std::move(icon_string); };
 
     void addProductLine(const ProductLine& product_line);
-    void addTarget(const std::shared_ptr<ProductTarget>& target_product);
-    [[nodiscard]] float targetRemainder(const std::shared_ptr<ProductTarget>& target) const;
+
+	/**
+	 * Adds given product to the subfactory's list of products
+	 * @param target_product
+	 */
+    void addProduct(const std::shared_ptr<LineTarget>& target_product);
+
+	/**
+	 * Gives the difference between the product's target rate and what is produced by product lines on the table
+	 * @param target
+	 * @return
+	 */
+    [[nodiscard]] float productRemainder(const std::shared_ptr<LineTarget>& target) const;
+
+	/**
+	 * Total power draw for the subfactory
+	 * @return
+	 */
     [[nodiscard]] float powerDraw() const { return power_draw_; };
-    [[nodiscard]] bool isTarget(const std::shared_ptr<ProductTarget>& item) const;
-    [[nodiscard]] std::vector<std::shared_ptr<ProductTarget>> ingredientsNotOnTable() const;
+
+	/**
+	 * Determines whether the given target is used by the product lines on the table
+	 * @param item
+	 * @return
+	 */
+    [[nodiscard]] bool isOnTable(const std::shared_ptr<LineTarget>& item) const;
+
+	/**
+	 * Creates a vector of line targets that omits targets used by the table\n
+	 * Used to create "Ingredients" list
+	 * @return
+	 */
+    [[nodiscard]] std::vector<std::shared_ptr<LineTarget>> ingredientsNotOnTable() const;
+
+	void resetChangeability();
 
     void updateByproducts();
     void updateIngredients();
@@ -45,9 +75,9 @@ class Subfactory {
     void calculate();
     void validate();
 
-    std::vector<std::shared_ptr<ProductTarget>> targets_;
-    std::vector<std::shared_ptr<ProductTarget>> byproducts_;
-    std::vector<std::shared_ptr<ProductTarget>> ingredients_;
+    std::vector<std::shared_ptr<LineTarget>> products_;
+    std::vector<std::shared_ptr<LineTarget>> byproducts_;
+    std::vector<std::shared_ptr<LineTarget>> ingredients_;
     std::vector<ProductLine> product_lines_;
 
   private:

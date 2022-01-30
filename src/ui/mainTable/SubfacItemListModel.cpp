@@ -12,7 +12,7 @@
 
 namespace ui {
 
-SubfacItemListModel::SubfacItemListModel(std::vector<std::shared_ptr<plan::ProductTarget>> list, QObject *parent) :
+SubfacItemListModel::SubfacItemListModel(std::vector<std::shared_ptr<plan::LineTarget>> list, QObject *parent) :
 	QAbstractTableModel(parent),
 	item_list_(std::move(list)) {
 
@@ -56,13 +56,13 @@ void SubfacItemListModel::refreshModel() {
     endResetModel();
 }
 
-void SubfacItemListModel::refreshModel(std::vector<std::shared_ptr<plan::ProductTarget>> new_list) {
+void SubfacItemListModel::refreshModel(std::vector<std::shared_ptr<plan::LineTarget>> new_list) {
     item_list_.clear();
 	item_list_ = std::move(new_list);
     refreshModel();
 }
 
-std::shared_ptr<plan::ProductTarget> SubfacItemListModel::getTarget(const QModelIndex& index) const {
+std::shared_ptr<plan::LineTarget> SubfacItemListModel::getTarget(const QModelIndex& index) const {
     return item_list_.at(index.row());
 }
 

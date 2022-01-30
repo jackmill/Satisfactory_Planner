@@ -22,7 +22,7 @@ add_executable(${PROJECT_NAME}
         mainTable/ProductionPane.cpp
         mainTable/ProductionTableModel.cpp
         mainTable/SubfacItemListModel.cpp
-        mainTable/TargetModel.cpp
+        mainTable/ProductModel.cpp
         mainTable/SpinBoxDelegate.cpp
         mainTable/TableIconDelegate.cpp
         mainTable/IconListDelegate.cpp

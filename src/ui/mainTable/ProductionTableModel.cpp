@@ -195,7 +195,7 @@ bool ProductionTableModel::removeRows(int startRow, int count, const QModelIndex
     return true;
 }
 
-std::shared_ptr<plan::ProductTarget> ProductionTableModel::getRowTarget(const QModelIndex &index) const {
+std::shared_ptr<plan::LineTarget> ProductionTableModel::getRowTarget(const QModelIndex &index) const {
     return (*subfactory_)->product_lines_.at(index.row()).target();
 }
 

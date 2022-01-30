@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "data/Recipe.h"
-#include "plan/ProductTarget.h"
+#include "plan/LineTarget.h"
 
 namespace plan {
 
@@ -21,14 +21,15 @@ class ProductLine {
     friend void to_json(nlohmann::json &json, const ProductLine &product_line);
 
   public:
-	ProductLine(std::shared_ptr<ProductTarget> target, data::Recipe recipe);
+	ProductLine(std::shared_ptr<LineTarget> target, data::Recipe recipe);
 
     ProductLine& operator= (const ProductLine &rhs) { return *this; };
 
 	void changeRecipe(const data::Recipe &recipe);
 	void updateMultiplier(const float &target_per_min);
 
-    [[nodiscard]] std::shared_ptr<ProductTarget> target() const { return target_; };
+    [[nodiscard]] uuids::uuid id() const { return id_; };
+	[[nodiscard]] std::shared_ptr<LineTarget> target() const { return target_; };
 	[[nodiscard]] float targetOutput() const { return target_->rate(); };
 	[[nodiscard]] float productOutput() const { return target_->rate() * percentage_; };
 	[[nodiscard]] float multiplier() const { return multiplier_; };
@@ -50,6 +51,8 @@ class ProductLine {
     [[nodiscard]] bool hasByproduct() const { return byproduct_.has_value(); };
 	[[nodiscard]] bool useByproduct() const { return use_byproduct_; };
 	void setUseByproduct(bool b) { use_byproduct_ = b; };
+	[[nodiscard]] bool isChangeable() const { return is_changeable_; };
+	void setChangeable(bool b) { is_changeable_ = b; };
 
     void calculate();
     void update();
@@ -60,8 +63,9 @@ class ProductLine {
 	[[nodiscard]] float multiplierCalculation(float target_rate, int target_item_amount) const;
 
   private:
-    bool complete_ = false;
-    std::shared_ptr<ProductTarget> target_;
+    uuids::uuid id_;
+	bool complete_ = false;
+    std::shared_ptr<LineTarget> target_;
 	float percentage_ = 1.0;
 	data::Recipe recipe_;
 	float clock_speed_ = 1.0;
@@ -74,6 +78,7 @@ class ProductLine {
 
     bool valid_ = false;
 	bool use_byproduct_ = false;
+	bool is_changeable_ = true;
 
     void calcRate(data::Item& item) const;
 };

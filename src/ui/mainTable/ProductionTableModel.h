@@ -31,7 +31,7 @@ class ProductionTableModel final : public QAbstractTableModel {
 
     bool insertRows(int startRow, const QModelIndex &parent, plan::ProductLine product_line);
     bool removeRows(int startRow, int count, const QModelIndex &parent) final;
-    [[nodiscard]] std::shared_ptr<plan::ProductTarget> getRowTarget(const QModelIndex &index) const;
+    [[nodiscard]] std::shared_ptr<plan::LineTarget> getRowTarget(const QModelIndex &index) const;
 
     void refreshModel();
 

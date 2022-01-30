@@ -18,8 +18,8 @@ void to_json(nlohmann::json &json, const Subfactory &subfactory) {
     json["name"] = subfactory.label_;
     json["icon"] = subfactory.icon_string_;
 
-    for (auto target = subfactory.targets_.cbegin(); target != subfactory.targets_.cend(); ++target) {
-		json["targets"][target - subfactory.targets_.cbegin()] = **target;
+    for (auto target = subfactory.products_.cbegin(); target != subfactory.products_.cend(); ++target) {
+		json["targets"][target - subfactory.products_.cbegin()] = **target;
     }
 
     for (auto byproduct = subfactory.byproducts_.cbegin(); byproduct != subfactory.byproducts_.cend(); ++byproduct) {
@@ -42,11 +42,11 @@ void Subfactory::addProductLine(const ProductLine& product_line) {
     product_lines_.emplace_back(product_line);
 }
 
-void Subfactory::addTarget(const std::shared_ptr<ProductTarget>& target_product) {
-	targets_.emplace_back(target_product);
+void Subfactory::addProduct(const std::shared_ptr<LineTarget>& target_product) {
+	products_.emplace_back(target_product);
 }
 
-float Subfactory::targetRemainder(const std::shared_ptr<ProductTarget>& target) const {
+float Subfactory::productRemainder(const std::shared_ptr<LineTarget>& target) const {
     float target_rate = target->rate();
     for (const auto &product : product_lines_) {
         if (product.target() == target) {
@@ -56,16 +56,16 @@ float Subfactory::targetRemainder(const std::shared_ptr<ProductTarget>& target) 
     return target_rate;
 }
 
-bool Subfactory::isTarget(const std::shared_ptr<ProductTarget>& item) const {
+bool Subfactory::isOnTable(const std::shared_ptr<LineTarget>& item) const {
     return std::any_of(product_lines_.cbegin(), product_lines_.cend(),
                        [item] (const plan::ProductLine& line){ return line.target() == item; });
 }
 
-std::vector<std::shared_ptr<ProductTarget>> Subfactory::ingredientsNotOnTable() const {
-    std::vector<std::shared_ptr<ProductTarget>> out;
+std::vector<std::shared_ptr<LineTarget>> Subfactory::ingredientsNotOnTable() const {
+    std::vector<std::shared_ptr<LineTarget>> out;
 
     for (const auto& ingredient : ingredients_) {
-		if (!isTarget(ingredient)) {
+		if (!isOnTable(ingredient)) {
 			out.push_back(ingredient);
         }
     }
@@ -77,10 +77,11 @@ void Subfactory::updateIngredients() {
     // Zero out existing ingredients
     for (const auto& ingredient : ingredients_) {
         ingredient->setRate(0);
+		ingredient->clearAssociated();
     }
 
     // Tally ingredients
-    for (const auto& line : product_lines_) {
+    for (auto& line : product_lines_) {
         for (const auto& line_ingredient : line.ingredients()) {
 
             if (!ingredients_.empty()) {
@@ -90,16 +91,19 @@ void Subfactory::updateIngredients() {
                     if (line_ingredient == ingredient->target()) {
                         exists = true;
                         ingredient->setRate(ingredient->rate() + line_ingredient.rate());
+						ingredient->addProductLineReference(line.id());
                     }
 
                 }
 
                 if (!exists) {
-                    ingredients_.emplace_back(std::make_shared<ProductTarget>(line_ingredient));
+                    ingredients_.emplace_back(std::make_shared<LineTarget>(line_ingredient));
+					ingredients_.at(ingredients_.size() - 1)->addProductLineReference(line.id());
                 }
 
             } else {
-                ingredients_.emplace_back(std::make_shared<ProductTarget>(line_ingredient));
+                ingredients_.emplace_back(std::make_shared<LineTarget>(line_ingredient));
+	            ingredients_.at(ingredients_.size() - 1)->addProductLineReference(line.id());
             }
 
         }
@@ -107,13 +111,31 @@ void Subfactory::updateIngredients() {
 
     // Find and remove existing ingredients that are not in the table
     // If the item's rate is 0, nothing added to it in the previous for loop, so it's not on the table
-    for (auto ingredient = ingredients_.cbegin(); ingredient != ingredients_.cend(); ++ingredient) {
-        if ((*ingredient)->rate() <= 0) {
-            ingredients_.erase(ingredient);
-        }
-    }
+    ingredients_.erase(std::remove_if(ingredients_.begin(), ingredients_.end(),
+									  [](const std::shared_ptr<LineTarget>& ingredient){
+											return ingredient->rate() <=0; }),
+					   ingredients_.end());
+
+	// Set product lines' changeable-ness
+	//  If a product line has ingredients that are the targets of other product lines,
+	//  they may not be deleted or changed
+	resetChangeability();
+	for (const auto& ingredient : ingredients_) {
+		if (isOnTable(ingredient)) {
+			for (auto& product_line: product_lines_) {
+				if (ingredient->isAssociated(product_line.id())) {
+					product_line.setChangeable(false);
+				}
+			}
+		}
+	}
 }
 
+void Subfactory::resetChangeability() {
+	for (auto& line : product_lines_) {
+		line.setChangeable(true);
+	}
+}
 
 void Subfactory::updateByproducts() {
     byproducts_.clear();
@@ -142,82 +164,9 @@ void Subfactory::updateByproducts() {
     }
 
 }
-/*
-void Subfactory::updateIngredients() {
-    ingredients_.clear();
-    byproducts_.clear();
-
-    // Make a list of the total output of the subfactory
-    std::vector<data::Item> output;
-
-    // Make a list of the total consumption of the subfactory
-    std::vector<data::Item> consumed_items;
-    for (const auto &line : product_lines_) {
-        for (const auto &line_prod : line.calcProducts()) {
-            // If the item is already in the list, add the rate to the existing total
-            // Else add it to the list
-            if (output.empty()) {
-                output.emplace_back(line_prod);
-            } else {
-                // Check for a duplicate
-                bool exists = false;
-                for (auto &output_prod : output) {
-                    // If we find a duplicate, add to its rate
-                    if (line_prod == output_prod) {
-                        output_prod.setRate(output_prod.rate() + line_prod.rate());
-                        exists = true;
-                    }
-                }
-                // If there wasn't a duplicate when we get to the end of the outputs loop,
-                // add it in
-                if (!exists) {
-                    output.emplace_back(line_prod);
-                }
-            }
-        }
-
-        for (const auto &line_ingr : line.calcIngredients()) {
-            // If the item is already in the list, add the rate to the existing total
-            // Else add it to the list
-            if (consumed_items.empty()) {
-                consumed_items.emplace_back(line_ingr);
-            } else {
-                bool exists = false;
-                for (auto &consumed_ingr: consumed_items) {
-                    if (line_ingr == consumed_ingr) {
-                        consumed_ingr.setRate(consumed_ingr.rate() + line_ingr.rate());
-                        exists = true;
-                    }
-                }
-                if (!exists) {
-                    consumed_items.emplace_back(line_ingr);
-                }
-            }
-        }
-    }
-
-    // Subtract total output from total consumption
-    for (auto ingredient = consumed_items.begin(); ingredient != consumed_items.end(); ++ingredient) {
-        for (const auto &product : output) {
-            if (product == *ingredient) {
-                ingredient->setRate(ingredient->rate() - product.rate());
-
-                // If the ingredient rate is zero, remove it from the list
-                if (ingredient->rate() <= 0) {
-                    consumed_items.erase(ingredient);
-                }
-            }
-        }
-    }
-
-    for (const auto& consumed : consumed_items) {
-        ingredients_.push_back(std::make_shared<data::Item>(consumed));
-    }
-}
-*/
 
 void Subfactory::checkTargetCompletion() {
-	for (auto& target : targets_) {
+	for (auto& target : products_) {
 		target->setCompletion(0);
 		for (const auto& line : product_lines_) {
 			if (target == line.target()) {
@@ -234,7 +183,6 @@ void Subfactory::calculate() {
     updateIngredients();
     updateByproducts();
 	checkTargetCompletion();
-
 
     do {
         validate();
