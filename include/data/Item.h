@@ -37,10 +37,11 @@ class Item {
     [[nodiscard]] std::string className() const { return class_name_; };
 	void setName(const std::string &name) { name_ = name; };
 	
-	[[nodiscard]] int amount() const;
-    [[nodiscard]] float rate() const;
-	void setAmount(const int &amount);
-    void setRate(const float &rate);
+	[[nodiscard]] int amount() const { return amount_.value_or(0); }
+    [[nodiscard]] float rate() const { return rate_.value_or(0); }
+	void setAmount(const int &amount) { amount_ = amount; }
+    void setRate(const float &rate) { rate_ = rate; }
+	void addRate(const float &rate) { rate_.value() += rate; }
     void clearAmount() { amount_.reset(); };
 
     void replaceWith(const data::Item& rhs);

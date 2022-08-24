@@ -13,8 +13,8 @@
 
 namespace ui {
 
-ItemSelectionDialog::ItemSelectionDialog(std::shared_ptr<data::Library> db, QWidget* parent) :
-		db_(std::move(db)),
+ItemSelectionDialog::ItemSelectionDialog(data::Library* db, QWidget* parent) :
+		db_(db),
         QDialog(parent) {
 	
 	layout_ = new QVBoxLayout(this);
@@ -39,8 +39,8 @@ ItemSelectionDialog::ItemSelectionDialog(std::shared_ptr<data::Library> db, QWid
     layout_->addWidget(actions_);
 }
 
-ItemSelectionDialog::ItemSelectionDialog(const data::Item& item, std::shared_ptr<data::Library> db, QWidget* parent) :
-		ItemSelectionDialog(std::move(db), parent) {
+ItemSelectionDialog::ItemSelectionDialog(const data::Item& item, data::Library* db, QWidget* parent) :
+		ItemSelectionDialog(db, parent) {
     setFromItem(item);
 }
 

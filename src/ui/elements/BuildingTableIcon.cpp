@@ -8,7 +8,7 @@
  */
 
 #include <QLabel>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "BuildingTableIcon.h"
 
@@ -19,7 +19,7 @@ BuildingTableIcon::BuildingTableIcon(const QString& icon_label, float rate, QWid
 
 	auto label_string = QString::number(rate, 'f', 2);
 	// Remove trailing zeroes
-	label_string.remove(QRegExp("\\.?0+$"));
+	label_string.remove(QRegularExpression("\\.?0+$"));
 
 	auto* label = new QLabel(label_string, this);
 	formatIconLabel(label);

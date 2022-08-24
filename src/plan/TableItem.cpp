@@ -1,44 +1,44 @@
 /**
  * @project Satisfactory_Planner
- * @file LineTarget.cpp
+ * @file TableItem.cpp
  * 
  * @author Jackson Miller
  * @date 2022-01-15
  * @copyright (c) 2022 Jackson Miller
  */
 
-#include "plan/LineTarget.h"
+#include "plan/TableItem.h"
 
 namespace plan {
 
-void to_json(nlohmann::json& json, const LineTarget& product_target) {
+void to_json(nlohmann::json& json, const TableItem& product_target) {
 	json["id"] = to_string(product_target.id_);
 	json["item"] = product_target.target_item_;
 }
 
-LineTarget::LineTarget(const data::Item& target) :
+TableItem::TableItem(const data::Item& target) :
 		target_item_(target){
 	id_ = uuids::uuid_system_generator{}();
 }
 
-LineTarget::LineTarget(uuids::uuid id, const data::Item& target):
+TableItem::TableItem(uuids::uuid id, const data::Item& target):
 		id_(id),
 		target_item_(target) {
 }
 
-void LineTarget::addProductLineReference(uuids::uuid contributor) {
+void TableItem::addProductLineReference(ProductLine* contributor) {
 	associated_product_lines_.emplace_back(contributor);
 }
 
-bool LineTarget::isAssociated(const uuids::uuid& contributor) const {
+bool TableItem::isAssociated(ProductLine* contributor) const {
 	return std::any_of(associated_product_lines_.cbegin(),
 					   associated_product_lines_.cend(),
-					   [contributor](const uuids::uuid& line) {
+					   [contributor](ProductLine* line) {
 		return contributor == line;
 	});
 }
 
-void LineTarget::clearAssociated() {
+void TableItem::clearAssociated() {
 	associated_product_lines_.clear();
 }
 

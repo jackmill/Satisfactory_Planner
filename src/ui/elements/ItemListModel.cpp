@@ -15,14 +15,14 @@
 
 namespace ui {
 
-ItemListModel::ItemListModel(std::shared_ptr<data::Library> db, QObject *parent) :
-    db_(std::move(db)),
+ItemListModel::ItemListModel(data::Library* db, QObject *parent) :
+    db_(db),
     QAbstractListModel(parent) {
     assert(db_);
 }
 
 int ItemListModel::rowCount(const QModelIndex &parent) const {
-    return db_->getItemsSorted().size();
+    return static_cast<int>(db_->getItemsSorted().size());
 }
 
 int ItemListModel::columnCount(const QModelIndex &parent) const {

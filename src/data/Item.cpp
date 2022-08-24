@@ -16,12 +16,6 @@ void to_json(nlohmann::json &json, const Item &item) {
     json["amount"] = item.amount_.value_or(0);
     json["rate"] = item.rate_.value_or(0);
 }
-
-/**
- * Constructor for an item with no amount
- * @param class_name
- * @param db
- */
 Item::Item(const std::string &class_name, const DBMap &db) :
     class_name_(class_name),
     name_(findKey(class_name, "mDisplayName", db)),
@@ -30,11 +24,6 @@ Item::Item(const std::string &class_name, const DBMap &db) :
     amount_.reset();
     rate_.reset();
 }
-
-/**
- * Constructor for an item with an amount
- * @return
- */
 Item::Item(const std::string &class_name, const int &amount, const DBMap &db) :
     class_name_(class_name),
     name_(findKey(class_name, "mDisplayName", db)),
@@ -47,22 +36,6 @@ Item::Item(const std::string &class_name, const int &amount, const DBMap &db) :
     }
 
     rate_.reset();
-}
-
-int Item::amount() const {
-	return amount_.value_or(0);
-}
-
-float Item::rate() const {
-    return rate_.value_or(0);
-}
-
-void Item::setAmount(const int &amount) {
-	amount_ = amount;
-}
-
-void Item::setRate(const float &rate) {
-    rate_ = rate;
 }
 
 void Item::replaceWith(const Item &rhs) {

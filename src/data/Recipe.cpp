@@ -133,8 +133,8 @@ void Recipe::GenerateBuilding(const std::string &building_string, const DBMap &d
 
 //std::vector<std::string> Recipe::productList() const {
 //    std::vector<std::string> product_list;
-//    for (const auto &product : products_) {
-//        product_list.push_back(product.name());
+//    for (const auto &targetItem : targets_) {
+//        product_list.push_back(targetItem.name());
 //    }
 //    return product_list;
 //}

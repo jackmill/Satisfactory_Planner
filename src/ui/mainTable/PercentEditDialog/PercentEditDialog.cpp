@@ -14,9 +14,9 @@
 
 namespace ui {
 
-PercentEditDialog::PercentEditDialog(plan::ProductLine& product_line, QWidget* parent) :
+PercentEditDialog::PercentEditDialog(plan::ProductLine* product_line, QWidget* parent) :
 		QDialog(parent),
-		line_(&product_line),
+		line_(product_line),
 		k_max_percent_((100 - line_->target()->completion()) + line_->percent()),
 		k_max_machines_(line_->multiplier() * (k_max_percent_ / line_->percent())){
 
@@ -34,7 +34,7 @@ PercentEditDialog::PercentEditDialog(plan::ProductLine& product_line, QWidget* p
 	item_output_target_ = new QDoubleSpinBox(this);
 	item_output_target_->setMinimum(0.01);
 	item_output_target_->setMaximum(line_->target()->rate() * (k_max_percent_ / 100));
-	item_output_target_->setValue(line_->productOutput());
+	item_output_target_->setValue(line_->actualOutputRate());
 	connect(item_output_target_,
 	        QOverload<double>::of(&QDoubleSpinBox::valueChanged),
 	        this,
@@ -78,7 +78,7 @@ void PercentEditDialog::S_percentTargetChanged() {
 void PercentEditDialog::S_outputTargetChanged() {
 	if (!editing_begun_) {
 		editing_begun_ = true;
-		const auto new_percent = (item_output_target_->value() / line_->targetOutput());
+		const auto new_percent = (item_output_target_->value() / line_->targetRate());
 
 		percent_target_->setValue(new_percent * 100);
 		num_machines_target_->setValue(k_max_machines_ * new_percent);

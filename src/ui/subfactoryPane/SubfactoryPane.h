@@ -26,10 +26,10 @@ namespace ui {
 class SubfactoryPane : public QWidget {
   Q_OBJECT
   public:
-	SubfactoryPane(std::shared_ptr<plan::Factory> factory, std::shared_ptr<data::Library> db, QWidget *parent = nullptr);
+	SubfactoryPane(plan::Factory* factory, data::Library* db, QWidget *parent = nullptr);
 
 
-	std::shared_ptr<plan::Subfactory> selectedSubfactory();
+	plan::Subfactory* selectedSubfactory();
 
   private:
 	struct Actions {
@@ -41,8 +41,8 @@ class SubfactoryPane : public QWidget {
 	Actions actions_;
 	QToolBar* toolbar_ = nullptr;
 
-    std::shared_ptr<data::Library> db_;
-    std::shared_ptr<plan::Factory> factory_;
+    data::Library* db_;
+    plan::Factory* factory_;
 
     SubfactoryListModel* subfactory_model_ = nullptr;
     QListView* subfactory_list_ = nullptr;

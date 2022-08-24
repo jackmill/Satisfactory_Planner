@@ -22,7 +22,7 @@ namespace ui {
 class ClockSpeedEditDialog final : public QDialog {
 	Q_OBJECT
   public:
-	explicit ClockSpeedEditDialog(plan::ProductLine& product_line, QWidget* parent = nullptr);
+	explicit ClockSpeedEditDialog(plan::ProductLine* product_line, QWidget* parent = nullptr);
 
 	[[nodiscard]] float getNewMult() const { return static_cast<float> (clock_speed_->value()); };
 

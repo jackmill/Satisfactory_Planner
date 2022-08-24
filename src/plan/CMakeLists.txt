@@ -2,7 +2,7 @@ add_library(plan
         Factory.cpp
         Subfactory.cpp
         ProductLine.cpp
-        LineTarget.cpp
+        TableItem.cpp
         )
 
 find_package(stduuid REQUIRED)

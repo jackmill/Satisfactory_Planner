@@ -117,10 +117,10 @@ void MainWindow::InitUI() {
 		resize(1000, 800);
 	}
 
-	subfactory_pane_ = new SubfactoryPane(factory_, db_, contents_);
+	subfactory_pane_ = new SubfactoryPane(factory_.get(), db_.get(), contents_);
     splitter_->addWidget(subfactory_pane_);
 
-    production_pane_ = new ProductionPane(factory_->subfactories_.at(0), db_, this);
+    production_pane_ = new ProductionPane(factory_->subfactories_.at(0).get(), db_.get(), this);
     splitter_->addWidget(production_pane_);
 
     splitter_->setCollapsible(0, true);

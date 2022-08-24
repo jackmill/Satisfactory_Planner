@@ -14,20 +14,21 @@
 namespace plan {
 
 std::ostream &operator<<(std::ostream &out, const Factory &factory) {
-    nlohmann::json json;
+    nlohmann::json output_json;
 
     for (auto subfactory = factory.subfactories_.cbegin(); subfactory != factory.subfactories_.cend(); ++subfactory) {
-        json["subfactories"][subfactory - factory.subfactories_.cbegin()] = **subfactory;
+	    output_json["subfactories"][subfactory - factory.subfactories_.cbegin()] = **subfactory;
     }
 
-    out << json;
+    out << output_json;
     return out;
 }
 
 std::istream &operator>>(std::istream &in, Factory &factory) {
     // Make sure there's a DBMap to generate from
     assert(factory.db_.has_value());
-
+	// TODO: Redo this
+/*
     nlohmann::json json;
     try {
         in >> json;
@@ -47,9 +48,9 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
         for (const auto &json_target : json_subfactory.at("targets")) {
             data::Item temp_item(json_target.at("item").at("class_name"), factory.db_.value());
             temp_item.setRate(json_target.at("item").at("rate"));
-            temp.addProduct(
-                    std::make_shared<LineTarget>(uuids::uuid::from_string(json_target.at("id").get<std::string>()),
-                                                 temp_item));
+            temp.addTarget(
+                    std::make_shared<TableItem>(uuids::uuid::from_string(json_target.at("id").get<std::string>()),
+                                                temp_item));
         }
 
         // Byproducts
@@ -57,7 +58,7 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
             for (const auto& json_target: json_subfactory.at("byproducts")) {
                 data::Item temp_item(json_target.at("item").at("class_name"), factory.db_.value());
                 temp_item.setRate(json_target.at("item").at("rate"));
-                temp.byproducts_.emplace_back(std::make_shared<LineTarget>(uuids::uuid::from_string(json_target.at("id").get<std::string>()), temp_item));
+                temp.byproducts_.emplace_back(std::make_shared<TableItem>(uuids::uuid::from_string(json_target.at("id").get<std::string>()), temp_item));
             }
         }
 
@@ -66,7 +67,7 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
             for (const auto& json_target: json_subfactory.at("ingredients")) {
                 data::Item temp_item(json_target.at("item").at("class_name"), factory.db_.value());
                 temp_item.setRate(json_target.at("item").at("rate"));
-                temp.ingredients_.emplace_back(std::make_shared<LineTarget>(uuids::uuid::from_string(json_target.at("id").get<std::string>()), temp_item));
+                temp.ingredients_.emplace_back(std::make_shared<TableItem>(uuids::uuid::from_string(json_target.at("id").get<std::string>()), temp_item));
             }
         }
 
@@ -74,13 +75,13 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
         if (json_subfactory.contains("product_lines")) {
             for (const auto& json_line: json_subfactory.at("product_lines")) {
 
-                // Search for the target of this product line in the targets and ingredients
+                // Search for the target of this targetItem line in the targets and ingredients
                 bool found_target = false;
-                for (const auto& target: temp.products_) {
+                for (const auto& target: temp.targets_) {
                     if (uuids::uuid::from_string(json_line.at("target").get<std::string>()) == target->id()) {
                         ProductLine temp_line(target, data::Recipe(json_line.at("recipe"), factory.db_.value()));
                         temp_line.setDone(json_line.at("done"));
-						temp_line.setClock(json_line.at("clock_speed"));
+	                    temp_line.setClockSpeed(json_line.at("clock_speed"));
 						temp_line.setPercent(json_line.at("percent"));
                         temp.product_lines_.emplace_back(temp_line);
 
@@ -96,7 +97,7 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
                             ProductLine temp_line(ingredient,
                                                   data::Recipe(json_line.at("recipe"), factory.db_.value()));
                             temp_line.setDone(json_line.at("done"));
-							temp_line.setClock(json_line.at("clock_speed"));
+	                        temp_line.setClockSpeed(json_line.at("clock_speed"));
 	                        temp_line.setPercent(json_line.at("percent"));
                             temp.product_lines_.emplace_back(temp_line);
 
@@ -108,11 +109,11 @@ std::istream &operator>>(std::istream &in, Factory &factory) {
         }
 
         // Run a calculation just to make sure everything's right
-        temp.calculate();
+        temp.calculateTable();
         new_subfactories.emplace_back(std::make_shared<Subfactory>(temp));
     }
     factory.subfactories_ = new_subfactories;
-
+*/
     return in;
 }
 
@@ -138,9 +139,10 @@ void Factory::save(const std::string &file_path) const {
     file.close();
 }
 
-void Factory::setSubfactories(std::vector<std::shared_ptr<Subfactory>> subfactories) {
-    subfactories_.clear();
-    subfactories_ = std::move(subfactories);
+void Factory::addSubfactory(const Subfactory& new_subfactory) {
+	subfactories_.emplace_back(std::make_unique<Subfactory>());
+	subfactories_.back()->setLabel(new_subfactory.label());
+	subfactories_.back()->setIcon(new_subfactory.icon());
 }
 
 }

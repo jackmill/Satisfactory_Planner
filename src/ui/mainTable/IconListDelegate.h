@@ -19,13 +19,13 @@ namespace ui {
 class IconListDelegate final : public QStyledItemDelegate {
 	Q_OBJECT
   public:
-	explicit IconListDelegate(plan::Subfactory_Ptr subfactory, QWidget* parent);
+	explicit IconListDelegate(plan::Subfactory** subfactory, QWidget* parent);
 
 	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const final;
 	[[nodiscard]] QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const final;
 
   private:
-	plan::Subfactory_Ptr subfactory_;
+	plan::Subfactory** subfactory_;
 };
 
 } // namespace ui

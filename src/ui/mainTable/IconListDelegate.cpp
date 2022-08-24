@@ -15,16 +15,16 @@
 
 namespace ui {
 
-IconListDelegate::IconListDelegate(plan::Subfactory_Ptr subfactory, QWidget* parent) :
-	subfactory_(std::move(subfactory)),
+IconListDelegate::IconListDelegate(plan::Subfactory** subfactory, QWidget* parent) :
+	subfactory_(subfactory),
 	QStyledItemDelegate(parent) {
 	assert(subfactory_);
 }
 
 void IconListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
-	const auto& line = (*subfactory_)->product_lines_.at(index.row());
+	const auto& line = (*subfactory_)->productLineAt(index.row());
 
-	auto* ingredients_widget = new IngredientIconList(line.ingredients(), dynamic_cast<QWidget*>(parent()));
+	auto* ingredients_widget = new IngredientIconList(line->ingredients(), dynamic_cast<QWidget*>(parent()));
 	ingredients_widget->setGeometry(option.rect);
 	painter->save();
 	painter->translate(option.rect.topLeft());
@@ -33,8 +33,8 @@ void IconListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 }
 
 QSize IconListDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
-	const auto& line = (*subfactory_)->product_lines_.at(index.row());
-	int width = static_cast<int>((ui::TableIcon::kSize_.width() + IngredientIconList::kPadding) * line.ingredients().size());
+	const auto& line = (*subfactory_)->productLineAt(index.row());
+	int width = static_cast<int>((ui::TableIcon::kSize_.width() + IngredientIconList::kPadding) * line->ingredients().size());
 
 	return {width, ui::TableIcon::kSize_.height()};
 }

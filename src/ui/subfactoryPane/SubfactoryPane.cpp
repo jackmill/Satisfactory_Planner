@@ -14,9 +14,9 @@
 
 namespace ui {
 
-SubfactoryPane::SubfactoryPane(std::shared_ptr<plan::Factory> factory, std::shared_ptr<data::Library> db, QWidget *parent) :
-    factory_(std::move(factory)),
-    db_(std::move(db)),
+SubfactoryPane::SubfactoryPane(plan::Factory* factory, data::Library* db, QWidget *parent) :
+    factory_(factory),
+    db_(db),
     QWidget(parent) {
 
     layout_ = new QVBoxLayout(this);
@@ -35,7 +35,7 @@ SubfactoryPane::SubfactoryPane(std::shared_ptr<plan::Factory> factory, std::shar
         plan::Subfactory new_subfactory("untitled", "");
 
         subfactory_model_->insertRow(subfactory_model_->rowCount(QModelIndex()), QModelIndex(),
-                                     std::make_shared<plan::Subfactory>(new_subfactory));
+                                     new_subfactory);
     }
 
     connect(subfactory_model_, &SubfactoryListModel::dataChanged, this, &SubfactoryPane::S_factoryChanged);
@@ -66,8 +66,8 @@ void SubfactoryPane::InitToolbar() {
     layout_->addWidget(toolbar_);
 }
 
-std::shared_ptr<plan::Subfactory> SubfactoryPane::selectedSubfactory() {
-    return subfactory_model_->getSubfactory(subfactory_list_->selectionModel()->currentIndex());
+plan::Subfactory* SubfactoryPane::selectedSubfactory() {
+    return factory_->subfactories_.at(subfactory_list_->selectionModel()->currentIndex().row()).get();
 }
 
 void SubfactoryPane::S_AddSubfactory() {
@@ -85,7 +85,7 @@ void SubfactoryPane::S_AddSubfactory() {
         new_subfactory.setIcon(dialog->getIcon().toStdString());
 
         subfactory_model_->insertRow(subfactory_model_->rowCount(QModelIndex()), QModelIndex(),
-                                     std::make_shared<plan::Subfactory>(new_subfactory));
+                                     new_subfactory);
     }
     dialog->deleteLater();
 }
@@ -95,8 +95,8 @@ void SubfactoryPane::S_EditSubfactory() {
     if (!selection.isValid()) {
         return;
     }
-    const unsigned int row = selection.row();
-    std::shared_ptr<plan::Subfactory> subfactory = factory_->subfactories_.at(row);
+    const int row = selection.row();
+    plan::Subfactory* subfactory = factory_->subfactoryAt(row);
 
     auto* dialog = new SubfactoryEditDialog(*subfactory, this);
     if (dialog->exec() == SubfactoryEditDialog::Accepted) {
@@ -108,7 +108,7 @@ void SubfactoryPane::S_EditSubfactory() {
 
 void SubfactoryPane::S_RemoveSubfactory() {
     // Check that we're not removing the only subfactory
-    if (factory_->subfactories_.size() <= 1) {
+    if (factory_->numSubfactories() <= 1) {
         return;
     }
 

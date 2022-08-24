@@ -27,9 +27,13 @@ class Factory {
 
     void save(const std::string &file_path) const;
 
-    void setSubfactories(std::vector<std::shared_ptr<Subfactory>> subfactories);
+	[[nodiscard]] int numSubfactories() const { return static_cast<int>(subfactories_.size()); }
 
-    std::vector<std::shared_ptr<Subfactory>> subfactories_;
+	void addSubfactory(const Subfactory& new_subfactory);
+
+	[[nodiscard]] Subfactory* subfactoryAt(int index) const { return subfactories_.at(index).get(); }
+
+    std::vector<std::unique_ptr<Subfactory>> subfactories_;
 
   private:
     // Used only for generation from json files

@@ -14,15 +14,15 @@
 namespace plan {
 
 void to_json(nlohmann::json &json, const ProductLine &product_line) {
-    json["done"] = product_line.complete_;
+    json["done"] = product_line.marked_complete_;
     json["target"] = uuids::to_string(product_line.target_->id());
     json["recipe"] = product_line.recipe_.className();
 	json["clock_speed"] = product_line.clock_speed_ * 100;
 	json["percent"] = product_line.percentage_ * 100;
 }
 
-ProductLine::ProductLine(std::shared_ptr<LineTarget> target, data::Recipe recipe) :
-        target_(std::move(target)),
+ProductLine::ProductLine(TableItem* target, data::Recipe recipe) :
+        target_(target),
         recipe_(std::move(recipe)),
         multiplier_(1) {
     id_ = uuids::uuid_system_generator{}();
@@ -59,7 +59,7 @@ float ProductLine::calcPower() const {
 std::vector<data::Item> ProductLine::calcIngredients() const {
     std::vector<data::Item> out = recipe_.ingredientList();
     for (auto &item : out) {
-        calcRate(item);
+	    item.setRate(itemRateCalculation(item.amount()));
     }
     return out;
 }
@@ -67,7 +67,7 @@ std::vector<data::Item> ProductLine::calcIngredients() const {
 std::vector<data::Item> ProductLine::calcProducts() const {
     std::vector<data::Item> out = recipe_.productList();
     for (auto &item : out) {
-        calcRate(item);
+		item.setRate(itemRateCalculation(item.amount()));
     }
     return out;
 }
@@ -91,11 +91,11 @@ void ProductLine::update() {
     power_ = calcPower();
 
     for (auto& ingredient : ingredients_) {
-        calcRate(ingredient);
+		ingredient.setRate(itemRateCalculation(ingredient.amount()));
     }
 
     if (byproduct_.has_value()) {
-        calcRate(byproduct_.value());
+		byproduct_->setRate(itemRateCalculation(byproduct_.value().amount()));
     }
 }
 
@@ -129,10 +129,6 @@ void ProductLine::validate() {
     }
 
     valid_ = true;
-}
-
-void ProductLine::calcRate(data::Item& item) const {
-    item.setRate(itemRateCalculation(item.amount()));
 }
 
 float ProductLine::itemRateCalculation(int item_amount) const {

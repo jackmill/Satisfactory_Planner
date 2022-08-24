@@ -57,8 +57,8 @@ class MainWindow : public QMainWindow {
 	QHBoxLayout* layout_ = nullptr;
 	QSplitter* splitter_ = nullptr;
 
-    std::shared_ptr<data::Library> db_;
-    std::shared_ptr<plan::Factory> factory_;
+    std::unique_ptr<data::Library> db_;
+    std::unique_ptr<plan::Factory> factory_;
 
     void InitActions();
     void InitMenu();

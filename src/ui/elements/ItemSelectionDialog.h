@@ -23,8 +23,8 @@ namespace ui {
 
 class ItemSelectionDialog : public QDialog {
   public:
-	explicit ItemSelectionDialog(std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
-    ItemSelectionDialog(const data::Item& item, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+	explicit ItemSelectionDialog(data::Library* db, QWidget* parent = nullptr);
+    ItemSelectionDialog(const data::Item& item, data::Library* db, QWidget* parent = nullptr);
 
     void setFromItem(const data::Item &item);
     void setFromItem(const data::Item &item, float rate);
@@ -35,7 +35,8 @@ class ItemSelectionDialog : public QDialog {
 	void allowItemChange(bool allow_item_change);
 
   private:
-    std::shared_ptr<data::Library> db_;
+    data::Library* db_;
+
     ItemListModel* model_ = nullptr;
 
     QComboBox* dialog_item_ = nullptr;

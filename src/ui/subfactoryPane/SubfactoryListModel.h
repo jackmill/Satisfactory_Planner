@@ -19,7 +19,7 @@ namespace ui {
 class SubfactoryListModel : public QAbstractListModel {
     Q_OBJECT
   public:
-    explicit SubfactoryListModel(std::shared_ptr<plan::Factory> factory, QObject* parent=nullptr);
+    explicit SubfactoryListModel(plan::Factory* factory, QObject* parent= nullptr);
 
     bool updateSubfactory(int row, const plan::Subfactory &subfactory);
 
@@ -27,14 +27,11 @@ class SubfactoryListModel : public QAbstractListModel {
     [[nodiscard]] int columnCount(const QModelIndex &parent) const final { return 1; };
     [[nodiscard]] QVariant data(const QModelIndex &index, int role) const final;
 
-    bool insertRows(int startRow, int count, const QModelIndex &parent) final;
-    bool insertRow(int startRow, const QModelIndex& parent, std::shared_ptr<plan::Subfactory> subfactory);
+    bool insertRow(int startRow, const QModelIndex& parent, const plan::Subfactory& subfactory);
     bool removeRows(int startRow, int count, const QModelIndex &parent) final;
 
-    std::shared_ptr<plan::Subfactory> getSubfactory(const QModelIndex &index);
-
   private:
-    std::shared_ptr<plan::Factory> factory_;
+    plan::Factory* factory_;
 
 
 };

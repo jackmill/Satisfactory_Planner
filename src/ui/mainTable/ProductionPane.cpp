@@ -22,10 +22,10 @@
 
 namespace ui {
 
-ProductionPane::ProductionPane(const std::shared_ptr<plan::Subfactory>& subfactory, std::shared_ptr<data::Library> db,
+ProductionPane::ProductionPane(plan::Subfactory* subfactory, data::Library* db,
                                QWidget *parent) :
-                         subfactory_(std::make_shared<std::shared_ptr<plan::Subfactory>>(subfactory)),
-                         db_(std::move(db)),
+                         subfactory_(std::make_unique<plan::Subfactory*>(subfactory)),
+                         db_(db),
                          QWidget(parent) {
     assert(subfactory_);
     assert(db_);
@@ -63,7 +63,9 @@ void ProductionPane::initActions() {
     actions_.product_act_add_to_table = new QAction(tr("Add to Table"), this);
     connect(actions_.product_act_add_to_table,
             &QAction::triggered,
-            [this] { S_addToTable(products_model_->getTarget(products_->selectionModel()->currentIndex())); });
+            [this] {
+		S_addToTable((*subfactory_)->targetAt(products_->selectionModel()->currentIndex().row()));
+	});
 
 
     actions_.product_act_edit = new QAction(tr("Edit Target"), this);
@@ -79,9 +81,11 @@ void ProductionPane::initActions() {
     actions_.ingredient_act_add_to_table = new QAction(tr("Add to Table"), this);
     connect(actions_.ingredient_act_add_to_table,
             &QAction::triggered,
-            [this] { S_addToTable(ingredients_model_->getTarget(ingredients_->selectionModel()->currentIndex())); });
+            [this] {
+		S_addToTable((*subfactory_)->ingredientAt(ingredients_->selectionModel()->currentIndex().row()));
+	});
 	
-	if ((*subfactory_)->products_.empty()) {
+	if (!(*subfactory_)->hasTargets()) {
 		actions_.product_act_add_to_table->setEnabled(false);
 		actions_.product_act_edit->setEnabled(false);
 		actions_.product_act_del->setEnabled(false);
@@ -109,7 +113,8 @@ void ProductionPane::initActions() {
 	connect(prod_table_actions_.byproduct_use,
 			&QAction::toggled,
 			[this] (bool checked){
-		(*subfactory_)->product_lines_.at(production_table_->selectionModel()->currentIndex().row()).setUseByproduct(checked);
+		(*subfactory_)->productLineAt(production_table_->selectionModel()->currentIndex().row())->setUseByproduct(checked);
+		S_refreshAll();
 	});
 
 	prod_table_actions_.delete_row = new QAction(tr("Delete Row"), this);
@@ -124,7 +129,7 @@ void ProductionPane::initProducts() {
 	products_layout_ = new QVBoxLayout(products_widget_);
 
 	products_ = new QTableView(products_widget_);
-	products_model_ = new ProductModel(db_, subfactory_, products_widget_);
+	products_model_ = new ProductModel(subfactory_.get(), products_widget_);
     products_->setModel(products_model_);
     products_->resizeColumnsToContents();
 
@@ -160,7 +165,7 @@ void ProductionPane::initByproducts() {
     byproducts_layout_ = new QVBoxLayout(byproducts_widget_);
 
     byproducts_ = new QTableView(byproducts_widget_);
-    byproducts_model_ = new SubfacItemListModel((*subfactory_)->byproducts_, byproducts_widget_);
+    byproducts_model_ = new ByproductsModel(subfactory_.get(), byproducts_widget_);
     byproducts_->setModel(byproducts_model_);
     byproducts_->setSelectionMode(QAbstractItemView::NoSelection);
 
@@ -173,7 +178,7 @@ void ProductionPane::initIngredients() {
     ingredients_layout_ = new QVBoxLayout(ingredients_widget_);
 
     ingredients_ = new QTableView(ingredients_widget_);
-    ingredients_model_ = new SubfacItemListModel((*subfactory_)->ingredientsNotOnTable(), ingredients_widget_);
+    ingredients_model_ = new IngredientsModel(subfactory_.get(), ingredients_widget_);
     ingredients_->setModel(ingredients_model_);
     ingredients_->setSelectionBehavior(QAbstractItemView::SelectRows);
 
@@ -185,10 +190,11 @@ void ProductionPane::initIngredients() {
 
 void ProductionPane::initTable() {
     production_table_ = new QTableView(this);
-    table_model_ = new ProductionTableModel(subfactory_, db_, this);
+    table_model_ = new ProductionTableModel(subfactory_.get(), db_, this);
     production_table_->setModel(table_model_);
 
-	auto* single_icon_delegate = new TableIconDelegate(subfactory_, this);
+	// Single icons delegates for PRODUCT, BUILDING, and BYPRODUCT
+	auto* single_icon_delegate = new TableIconDelegate(subfactory_.get(), this);
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Product),
 	                                            single_icon_delegate);
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Building),
@@ -196,6 +202,7 @@ void ProductionPane::initTable() {
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Byproduct),
 	                                            single_icon_delegate);
 
+	// Spin box delegates for PERCENT and CLOCK SPEED
 	auto* percentage_delegate = new SpinBoxDelegate(0.01, 100.0, this);
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Percentage),
 												percentage_delegate);
@@ -204,6 +211,7 @@ void ProductionPane::initTable() {
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::ClockSpeed),
 	                                            clock_speed_delegate);
 
+	// Right click menus
 	production_table_->setContextMenuPolicy(Qt::ActionsContextMenu);
 	production_table_->addAction(prod_table_actions_.recipe_change);
 	production_table_->addAction(prod_table_actions_.percent_edit);
@@ -217,7 +225,7 @@ void ProductionPane::initTable() {
 			&QItemSelectionModel::selectionChanged,
 			[this] { S_prodTableContextMenu(production_table_->selectionModel()->currentIndex()); });
 
-	auto* ingredients_delegate = new IconListDelegate(subfactory_, this);
+	auto* ingredients_delegate = new IconListDelegate(subfactory_.get(), this);
 	production_table_->setItemDelegateForColumn(static_cast<int>(ProductionTableModel::Column::Ingredients),
 												ingredients_delegate);
 
@@ -234,8 +242,8 @@ void ProductionPane::resizeAll() {
     ingredients_->resizeColumnsToContents();
 }
 
-void ProductionPane::changeSubfactory(std::shared_ptr<plan::Subfactory> subfactory) {
-	*subfactory_ = std::move(subfactory);
+void ProductionPane::changeSubfactory(plan::Subfactory* subfactory) {
+	*subfactory_ = subfactory;
 
 	S_refreshAll();
 }
@@ -245,66 +253,65 @@ void ProductionPane::S_addNewTarget() {
     if (dialog->exec() == QDialog::Accepted) {
         data::Item new_target = dialog->getSelectedItem();
 
-        // Check that this isn't a duplicate target
-        bool duplicate = false;
-        for (auto &existing_item : (*subfactory_)->products_) {
-            if (new_target == existing_item->target()) {
-                existing_item->setRate(existing_item->rate() + new_target.rate());
-                duplicate = true;
-            }
-        }
-
-        if (!duplicate) {
-            products_model_->insertRows(products_model_->rowCount(QModelIndex()),
-                                        QModelIndex(),
-                                        std::make_shared<plan::LineTarget> (new_target));
-        }
-
+        products_model_->insertRows(products_model_->rowCount(QModelIndex()),
+                                    QModelIndex(),
+                                    new_target);
         products_->resizeColumnsToContents();
     }
     dialog->deleteLater();
 }
 
 void ProductionPane::S_editTarget(const QModelIndex &index) {
-    std::shared_ptr<plan::LineTarget> item = products_model_->getTarget(index);
-    auto* dialog = new ItemSelectionDialog(item->target(), db_, this);
-	dialog->allowItemChange(!(*subfactory_)->isOnTable(item));
-    if (dialog->exec() == QDialog::Accepted) {
-        data::Item new_target = dialog->getSelectedItem();
+    plan::TableItem* item = (*subfactory_)->targetAt(index.row());
+    auto dialog = ItemSelectionDialog(item->target(), db_, this);
+	dialog.allowItemChange(!(*subfactory_)->isOnTable(item));
+    if (dialog.exec() == QDialog::Accepted) {
+        data::Item new_target = dialog.getSelectedItem();
 
-        // If we're creating a duplicate target, add the edited rate to the existing and get rid of the duplicate
-        bool duplicate = false;
-        for (auto existing_item = (*subfactory_)->products_.cbegin(); existing_item != (*subfactory_)->products_.cend(); ++existing_item) {
-            if (new_target == (*existing_item)->target() &&
-                index.row() != std::distance((*subfactory_)->products_.cbegin(), existing_item)) {
-                duplicate = true;
-                (*existing_item)->setRate((*existing_item)->rate() + new_target.rate());
-                products_model_->removeRows(index.row(), 1, QModelIndex());
-            }
-        }
+        // If the edited target is already a target and would create a duplicate,
+		if ((*subfactory_)->isTarget(new_target)) {
 
-        if (!duplicate) {
-            item->replaceWith(new_target);
-        }
+			// Combine the edited target with the existing one and remove the now-duplicate from the list
+			(*subfactory_)->addToTarget(new_target);
+			products_model_->removeRows(index.row(), 1, QModelIndex());
 
+		} else {
+			// Else, replace the existing target with the edited version of itself
+			item->replaceWith(new_target);
+		}
+
+//        bool duplicate = false;
+//        for (auto existing_item = (*subfactory_)->targets_.cbegin(); existing_item != (*subfactory_)->targets_.cend(); ++existing_item) {
+//            if (new_target == (*existing_item)->target() &&
+//                index.row() != std::distance((*subfactory_)->targets_.cbegin(), existing_item)) {
+//                duplicate = true;
+//                (*existing_item)->setRate((*existing_item)->rate() + new_target.rate());
+//                products_model_->removeRows(index.row(), 1, QModelIndex());
+//            }
+//        }
+//
+//        if (!duplicate) {
+//            item->replaceWith(new_target);
+//        }
+
+		// If this target was already on the production table, update the table with the new rate
         if ((*subfactory_)->isOnTable(item)) {
 			Q_EMIT(products_model_->dataChanged(index, index));
         }
 
         products_->resizeColumnsToContents();
     }
-    dialog->deleteLater();
 }
 
 void ProductionPane::S_removeTarget(const QModelIndex& index) {
-    // Remove the product
+    // Remove the targetItem
     products_model_->removeRows(index.row(), 1, QModelIndex());
 
     // Refresh the rest of the table
-    ingredients_model_->refreshModel((*subfactory_)->ingredientsNotOnTable());
+    ingredients_model_->refreshModel();
 }
 
-void ProductionPane::S_addToTable(std::shared_ptr<plan::LineTarget> target) {
+void ProductionPane::S_addToTable(plan::TableItem* target) {
 	if ((*subfactory_)->productRemainder(target) > 0) {
         const auto recipes = db_->FindRecipes(target->target());
         bool added_to_table = false;
@@ -312,7 +319,7 @@ void ProductionPane::S_addToTable(std::shared_ptr<plan::LineTarget> target) {
 
         // If there's only one recipe to choose, just select that one
         if (recipes.size() == 1) {
-			auto new_line = plan::ProductLine(std::move(target), recipes.at(0));
+			auto new_line = plan::ProductLine(target, recipes.at(0));
 			new_line.setPercent(new_line_percent);
 
 			table_model_->insertRows(table_model_->rowCount(QModelIndex()),
@@ -325,7 +332,7 @@ void ProductionPane::S_addToTable(std::shared_ptr<plan::LineTarget> target) {
         if (!added_to_table) {
             auto *dialog = new RecipeSelectDialog(recipes);
             if (dialog->exec() == QDialog::Accepted) {
-				auto new_line = plan::ProductLine(std::move(target), dialog->getSelectedRecipe());
+				auto new_line = plan::ProductLine(target, dialog->getSelectedRecipe());
 	            new_line.setPercent(new_line_percent);
 
 				table_model_->insertRows(table_model_->rowCount(QModelIndex()),
@@ -344,18 +351,18 @@ void ProductionPane::S_addToTable(std::shared_ptr<plan::LineTarget> target) {
 }
 
 void ProductionPane::S_refreshAll() {
-	(*subfactory_)->calculate();
+	(*subfactory_)->calculateTable();
 
 	products_model_->refreshModel();
 	table_model_->refreshModel();
 	byproducts_model_->refreshModel();
-	ingredients_model_->refreshModel((*subfactory_)->ingredientsNotOnTable());
+	ingredients_model_->refreshModel();
 
 	resizeAll();
 }
 
 void ProductionPane::S_productSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
-	if (selected.empty() || (*subfactory_)->products_.empty()) {
+	if (selected.empty() || !(*subfactory_)->hasTargets()) {
 		actions_.product_act_add_to_table->setEnabled(false);
 		actions_.product_act_edit->setEnabled(false);
 		actions_.product_act_del->setEnabled(false);
@@ -363,7 +370,7 @@ void ProductionPane::S_productSelectionChanged(const QItemSelection& selected, c
 		return;
 	}
 
-	const auto selected_target = products_model_->getTarget(selected.indexes().at(0));
+	const auto selected_target = (*subfactory_)->targetAt(selected.indexes().at(0).row());
 	if ((*subfactory_)->isOnTable(selected_target)) {
 		if (selected_target->completion() >= 100.0) {
 			actions_.product_act_add_to_table->setEnabled(false);
@@ -386,18 +393,18 @@ void ProductionPane::S_productSelectionChanged(const QItemSelection& selected, c
 void ProductionPane::S_prodTableContextMenu(const QModelIndex& index) {
 	prod_table_actions_.setAllInvisible();
 
-	const auto& selected_line = (*subfactory_)->product_lines_.at(index.row());
-	if (!selected_line.isChangeable()) {
+	const auto& selected_line = (*subfactory_)->productLineAt(index.row());
+	if (!selected_line->isChangeable()) {
 		prod_table_actions_.delete_row->setEnabled(false);
-		prod_table_actions_.delete_row->setToolTip(tr("Cannot delete product line whose ingredients are used by the table"));
+		prod_table_actions_.delete_row->setToolTip(tr("Cannot delete targetItem line whose ingredients are used by the table"));
 
 		prod_table_actions_.recipe_change->setEnabled(false);
-		prod_table_actions_.recipe_change->setToolTip(tr("Cannot change product line whose ingredients are used by the table"));
+		prod_table_actions_.recipe_change->setToolTip(tr("Cannot change targetItem line whose ingredients are used by the table"));
 	} else {
 		prod_table_actions_.delete_row->setEnabled(true);
 		prod_table_actions_.delete_row->setToolTip("");
 
-		if (db_->FindRecipes(selected_line.target()->target()).size() <= 1) {
+		if (db_->FindRecipes(selected_line->target()->target()).size() <= 1) {
 			prod_table_actions_.recipe_change->setEnabled(false);
 			prod_table_actions_.recipe_change->setToolTip(tr("No other recipes available"));
 		} else {
@@ -415,23 +422,24 @@ void ProductionPane::S_prodTableContextMenu(const QModelIndex& index) {
 	} else if (column == ProductionTableModel::Column::ClockSpeed) {
 		prod_table_actions_.clock_edit->setVisible(true);
 	} else if (column == ProductionTableModel::Column::Byproduct) {
+		prod_table_actions_.byproduct_use->setChecked(selected_line->useByproduct());
 		prod_table_actions_.byproduct_use->setVisible(true);
 	}
 }
 
 void ProductionPane::S_editPercent(const QModelIndex& index) {
-	auto* dialog = new PercentEditDialog((*subfactory_)->product_lines_.at(index.row()), this);
+	auto* dialog = new PercentEditDialog((*subfactory_)->productLineAt(index.row()), this);
 	if (dialog->exec() == QDialog::Accepted) {
-		(*subfactory_)->product_lines_.at(index.row()).setPercent(dialog->selectedPercent());
+		(*subfactory_)->productLineAt(index.row())->setPercent(dialog->selectedPercent());
 		S_refreshAll();
 	}
 	dialog->deleteLater();
 }
 
 void ProductionPane::S_editClockSpeed(const QModelIndex& index) {
-	auto* dialog = new ClockSpeedEditDialog((*subfactory_)->product_lines_.at(index.row()), this);
+	auto* dialog = new ClockSpeedEditDialog((*subfactory_)->productLineAt(index.row()), this);
 	if (dialog->exec() == QDialog::Accepted) {
-		(*subfactory_)->product_lines_.at(index.row()).setClock(dialog->getNewMult());
+		(*subfactory_)->productLineAt(index.row())->setClockSpeed(dialog->getNewMult());
 		S_refreshAll();
 	}
 	dialog->deleteLater();
@@ -445,10 +453,10 @@ void ProductionPane::S_removeProductLine(const QModelIndex& index) {
 }
 
 void ProductionPane::S_changeProductLineRecipe(const QModelIndex& index) {
-	const auto recipes = db_->FindRecipes((*subfactory_)->product_lines_.at(index.row()).target()->target());
+	const auto recipes = db_->FindRecipes((*subfactory_)->productLineAt(index.row())->targetItem());
 	auto* dialog = new RecipeSelectDialog(recipes);
 	if (dialog->exec() == QDialog::Accepted) {
-		(*subfactory_)->product_lines_.at(index.row()).changeRecipe(dialog->getSelectedRecipe());
+		(*subfactory_)->productLineAt(index.row())->changeRecipe(dialog->getSelectedRecipe());
 		S_refreshAll();
 	}
 	dialog->deleteLater();

@@ -21,7 +21,8 @@ add_executable(${PROJECT_NAME}
 
         mainTable/ProductionPane.cpp
         mainTable/ProductionTableModel.cpp
-        mainTable/SubfacItemListModel.cpp
+        mainTable/IngredientsModel.cpp
+        mainTable/ByproductsModel.cpp
         mainTable/ProductModel.cpp
         mainTable/SpinBoxDelegate.cpp
         mainTable/TableIconDelegate.cpp

@@ -58,7 +58,7 @@ data::Recipe RecipeSelectDialog::getSelectedRecipe() {
         return recipe_model_->getSelectedRecipe(recipe_table_->selectionModel()->currentIndex());
     } else {
         // Without a row selected, return the 'default' recipe
-        // (The recipe named the same as the target product)
+        // (The recipe named the same as the target targetItem)
         for (const auto &recipe : recipes_) {
             for (const auto &product : recipe.productList()) {
                 if (recipe.name() == product.name()) {

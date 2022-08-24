@@ -17,7 +17,7 @@ IngredientIconList::IngredientIconList(const std::vector<data::Item>& ingredient
 
 	layout_ = new QHBoxLayout(this);
 	layout_->setSpacing(kPadding);
-	layout_->setMargin(0);
+	layout_->setContentsMargins(0, 0, 0, 0);
 	layout_->setAlignment(Qt::AlignLeft);
 
 	for (const auto& ingredient : ingredients_list) {

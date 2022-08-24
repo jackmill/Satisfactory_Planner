@@ -13,15 +13,15 @@
 
 namespace ui {
 
-ClockSpeedEditDialog::ClockSpeedEditDialog(plan::ProductLine& product_line, QWidget* parent) :
+ClockSpeedEditDialog::ClockSpeedEditDialog(plan::ProductLine* product_line, QWidget* parent) :
 	QDialog(parent),
-	line_(&product_line),
-	k_base_machines_((line_->clock() / 100) * line_->multiplier()) {
+	line_(product_line),
+	k_base_machines_((line_->clockSpeed() / 100) * line_->multiplier()) {
 
 	/**
 	 * C - Clock Speed
-	 * Nm - Number of machines with a clock speed of 100%
-	 * Nc - Number of machines with clock speed set
+	 * Nm - Number of machines with a clockSpeed speed of 100%
+	 * Nc - Number of machines with clockSpeed speed set
 	 *
 	 * C = Nm / Nc
 	 * Nm = C * Nc
@@ -33,14 +33,14 @@ ClockSpeedEditDialog::ClockSpeedEditDialog(plan::ProductLine& product_line, QWid
 	clock_speed_ = new QDoubleSpinBox(this);
 	clock_speed_->setMinimum(0.01);
 	clock_speed_->setMaximum(250);
-	clock_speed_->setValue(line_->clock());
+	clock_speed_->setValue(line_->clockSpeed());
 	connect(clock_speed_,
 	        QOverload<double>::of(&QDoubleSpinBox::valueChanged),
 	        this,
 			&ClockSpeedEditDialog::S_clockSpeedChanged);
 
 	num_machines_ = new QDoubleSpinBox(this);
-	num_machines_->setMinimum(k_base_machines_ / 2.5); // number of machines at clock 250%
+	num_machines_->setMinimum(k_base_machines_ / 2.5); // number of machines at clockSpeed 250%
 	num_machines_->setMaximum(10000);
 	num_machines_->setValue(line_->multiplier());
 	connect(num_machines_,

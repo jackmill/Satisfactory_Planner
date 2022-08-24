@@ -20,7 +20,7 @@
 namespace plan {
 
 class Subfactory {
-    friend void to_json(nlohmann::json &json, const Subfactory &subfactory);
+	friend void to_json(nlohmann::json &json, const Subfactory &subfactory);
 
   public:
 	Subfactory() = default;
@@ -32,62 +32,119 @@ class Subfactory {
     void setLabel(std::string label) { label_ = std::move(label); };
     void setIcon(std::string icon_string) { icon_string_ = std::move(icon_string); };
 
+	[[nodiscard]] int numTargets() const { return static_cast<int>(targets_.size()); }
+	[[nodiscard]] int numByproducts() const { return static_cast<int>(byproducts_.size()); }
+	[[nodiscard]] int numIngredients() const { return static_cast<int>(ingredients_.size()); }
+	[[nodiscard]] int numProductLines() const { return static_cast<int>(product_lines_.size()); }
+
+	[[nodiscard]] bool hasTargets() const { return !targets_.empty(); }
+	[[nodiscard]] bool hasByproducts() const { return !byproducts_.empty(); }
+	[[nodiscard]] bool hasIngredients() const { return !ingredients_.empty(); }
+	[[nodiscard]] bool hasProductLines() const { return !product_lines_.empty(); }
+
+	[[nodiscard]] TableItem* targetAt(int pos) const { return targets_.at(pos).get(); }
+	[[nodiscard]] data::Item byproductAt(int pos) const { return byproducts_.at(pos); }
+	[[nodiscard]] TableItem* ingredientAt(int pos) const { return ingredients_.at(pos).get(); }
+	[[nodiscard]] ProductLine* productLineAt(int pos) const { return product_lines_.at(pos).get(); }
+
     void addProductLine(const ProductLine& product_line);
 
 	/**
-	 * Adds given product to the subfactory's list of products
+	 * Adds given targetItem to the subfactory's list of targets\n
+	 * If the given targetItem already exists, it will be combined
 	 * @param target_product
 	 */
-    void addProduct(const std::shared_ptr<LineTarget>& target_product);
+    void addTarget(const TableItem& target_product);
 
 	/**
-	 * Gives the difference between the product's target rate and what is produced by product lines on the table
+	 * Adds given targetItem to the subfactory's list of targets\n
+	 * If the given targetItem already exists, it will be combined
+	 * @param target_product
+	 */
+	void addTarget(const data::Item& target_product);
+
+	/**
+	 * Add the given item's rate to the
+	 * @param item
+	 */
+	void addToTarget(const data::Item& item);
+
+	/**
+	 * Removes target products between the given indices
+	 * @param start_index
+	 * @param end_index
+	 */
+	void removeTargets(int start_index, int end_index);
+
+	/**
+	 * Removes targetItem lines between the given indices
+	 * @param start_index
+	 * @param end_index
+	 */
+	void removeProductLines(int start_index, int end_index);
+
+	/**
+	 * Gives the difference between the product's target rate and what is produced by targetItem lines on the table
 	 * @param target
 	 * @return
 	 */
-    [[nodiscard]] float productRemainder(const std::shared_ptr<LineTarget>& target) const;
+    [[nodiscard]] float productRemainder(TableItem* target) const;
 
 	/**
 	 * Total power draw for the subfactory
 	 * @return
 	 */
-    [[nodiscard]] float powerDraw() const { return power_draw_; };
+    [[nodiscard]] float powerDraw() const;
 
 	/**
-	 * Determines whether the given target is used by the product lines on the table
+	 * Checks if the given item is the target product of an existing targetItem line
+	 * @param target
+	 * @return
+	 */
+	[[nodiscard]] bool isOnTable(TableItem* target) const;
+
+	/**
+	 * Checks if the given item is a target
+	 * @param target
+	 * @return
+	 */
+	[[nodiscard]] bool isTarget(const data::Item& target) const;
+
+	/**
+	 * Checks if the given item is an intermediate product
 	 * @param item
 	 * @return
 	 */
-    [[nodiscard]] bool isOnTable(const std::shared_ptr<LineTarget>& item) const;
+	[[nodiscard]] bool isIntermediate(const data::Item& item) const;
 
 	/**
-	 * Creates a vector of line targets that omits targets used by the table\n
-	 * Used to create "Ingredients" list
+	 * Checks if the given item is an ingredient
+	 * @param item
 	 * @return
 	 */
-    [[nodiscard]] std::vector<std::shared_ptr<LineTarget>> ingredientsNotOnTable() const;
+	[[nodiscard]] bool isIngredient(const data::Item& item) const;
 
-	void resetChangeability();
-
-    void updateByproducts();
-    void updateIngredients();
 	void checkTargetCompletion();
-    void calculate();
+    void calculateTable();
+	void calculate();
     void validate();
-
-    std::vector<std::shared_ptr<LineTarget>> products_;
-    std::vector<std::shared_ptr<LineTarget>> byproducts_;
-    std::vector<std::shared_ptr<LineTarget>> ingredients_;
-    std::vector<ProductLine> product_lines_;
 
   private:
     std::string label_;
     std::string icon_string_;
 
-    float power_draw_ = 0.0;
-};
+	// Target products -- the 'goals' of this subfactory
+	std::vector<std::unique_ptr<TableItem>> targets_;
 
-using Subfactory_Ptr = std::shared_ptr<std::shared_ptr<Subfactory>>;
+	// Intermediary products
+	// e.g. Steel Ingots in a Coal+Iron -> Steel Ingot -> Steel Pipe production line
+	std::vector<std::unique_ptr<TableItem>> intermediates_;
+
+	std::vector<std::unique_ptr<ProductLine>> product_lines_;
+
+	std::vector<data::Item> byproducts_;
+	std::vector<std::unique_ptr<TableItem>> ingredients_;
+};
 
 } // namespace plan
 

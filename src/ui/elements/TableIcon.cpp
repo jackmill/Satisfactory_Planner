@@ -19,11 +19,11 @@ TableIcon::TableIcon(const QString& icon_label, QWidget* parent) :
 
 	setFixedSize(kSize_);
 	layout_ = new QVBoxLayout(this);
-	layout_->setMargin(2);
-	layout_->addSpacerItem(new QSpacerItem(kSize_.width(), kSize_.height()));
+	layout_->setContentsMargins(2, 2, 2, 2);
+	layout_->addSpacerItem(new QSpacerItem(TableIcon::kSize_.width(), TableIcon::kSize_.height()));
 
 	setIcon(util::itemIconFromDisplayName(icon_label));
-	setIconSize(kSize_ * 0.9);
+	setIconSize(TableIcon::kSize_ * 0.9);
 }
 
 TableIcon::TableIcon(const QString& icon_label, int rate, QWidget* parent) :

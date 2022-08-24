@@ -16,7 +16,7 @@ RecipeIconList::RecipeIconList(const std::vector<data::Item>& item_list, QWidget
 
 	layout_ = new QHBoxLayout(this);
 	layout_->setSpacing(kPadding);
-	layout_->setMargin(0);
+	layout_->setContentsMargins(0, 0, 0, 0);
 	layout_->setAlignment(Qt::AlignLeft);
 
 	for (const auto& item : item_list) {

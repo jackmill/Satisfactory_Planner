@@ -19,7 +19,7 @@ namespace ui {
 class ItemListModel : public QAbstractListModel {
     Q_OBJECT
   public:
-    explicit ItemListModel(std::shared_ptr<data::Library> db, QObject* parent = nullptr);
+    explicit ItemListModel(data::Library* db, QObject* parent = nullptr);
 
     [[nodiscard]] int rowCount(const QModelIndex &parent) const final;
     [[nodiscard]] int columnCount(const QModelIndex &parent) const final;
@@ -28,7 +28,7 @@ class ItemListModel : public QAbstractListModel {
     [[nodiscard]] data::Item itemAtRow(int row_num) const;
 
   private:
-    std::shared_ptr<data::Library> db_;
+    data::Library* db_;
 
 };
 

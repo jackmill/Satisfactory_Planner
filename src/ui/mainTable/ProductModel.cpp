@@ -14,12 +14,10 @@
 
 namespace ui {
 
-ProductModel::ProductModel(std::shared_ptr<data::Library> db, plan::Subfactory_Ptr subfactory, QObject *parent) :
-        db_(std::move(db)),
-        subfactory_(std::move(subfactory)),
+ProductModel::ProductModel(plan::Subfactory** subfactory, QObject* parent) :
+        subfactory_(subfactory),
         QAbstractTableModel(parent) {
     assert(subfactory_);
-    assert(db_);
 }
 
 QVariant ProductModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -37,7 +35,7 @@ QVariant ProductModel::headerData(int section, Qt::Orientation orientation, int 
 }
 
 QVariant ProductModel::data(const QModelIndex &index, int role) const {
-    const auto target = (*subfactory_)->products_.at(index.row());
+    const auto target = (*subfactory_)->targetAt(index.row());
     const auto column = static_cast<Column> (index.column());
 
     if (role == Qt::ItemDataRole::DisplayRole) {
@@ -75,7 +73,7 @@ QVariant ProductModel::data(const QModelIndex &index, int role) const {
 
 bool ProductModel::setData(const QModelIndex& index, const QVariant& value, int role) {
 	const auto column = static_cast<Column> (index.column());
-	const auto target = (*subfactory_)->products_.at(index.row());
+	const auto target = (*subfactory_)->targetAt(index.row());
 	bool success = false;
 
 	if (role == Qt::ItemDataRole::EditRole) {
@@ -103,31 +101,34 @@ Qt::ItemFlags ProductModel::flags(const QModelIndex& index) const {
 	}
 }
 
-bool ProductModel::insertRows(int startRow, const QModelIndex &parent, const std::shared_ptr<plan::LineTarget>& new_target) {
-    beginInsertRows(parent, startRow, startRow);
+bool ProductModel::insertRows(int startRow, const QModelIndex &parent, const data::Item& new_target) {
+    if ((*subfactory_)->isTarget(new_target)) {
+	    (*subfactory_)->addToTarget(new_target);
 
-    (*subfactory_)->products_.emplace_back(new_target);
+		return false;
+	} else {
 
-    endInsertRows();
-    return true;
+	    beginInsertRows(parent, startRow, startRow);
+
+	    (*subfactory_)->addTarget(new_target);
+
+	    endInsertRows();
+    }
+
+	return true;
 }
 
 bool ProductModel::removeRows(int startRow, int count, const QModelIndex &parent) {
-    if (count == 0 || (*subfactory_)->products_.size() <= 1) {
+    if (count == 0 || (*subfactory_)->numTargets() <= 1) {
         return false;
     }
 
     const int endRow = startRow + count - 1;
     beginRemoveRows(parent, startRow, endRow);
-    (*subfactory_)->products_.erase((*subfactory_)->products_.begin() + startRow,
-                                    (*subfactory_)->products_.begin() + (endRow + 1));
+	(*subfactory_)->removeTargets(startRow, endRow);
     endRemoveRows();
 
     return true;
-}
-
-std::shared_ptr<plan::LineTarget> ProductModel::getTarget(const QModelIndex &index) const {
-    return (*subfactory_)->products_.at(index.row());
 }
 
 void ProductModel::refreshModel() {

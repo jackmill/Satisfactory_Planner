@@ -1,24 +1,24 @@
 /**
  * @project Satisfactory_Planner
- * @file SubfacItemListModel.cpp
+ * @file IngredientsModel.cpp
  * 
  * @author Jackson Miller
  * @date 2021-11-07
  * @copyright (c) 2021 Jackson Miller
  */
 
-#include "SubfacItemListModel.h"
+#include "IngredientsModel.h"
 #include "../util.h"
 
 namespace ui {
 
-SubfacItemListModel::SubfacItemListModel(std::vector<std::shared_ptr<plan::LineTarget>> list, QObject *parent) :
+IngredientsModel::IngredientsModel(plan::Subfactory** subfactory, QObject *parent) :
 	QAbstractTableModel(parent),
-	item_list_(std::move(list)) {
-
+	subfactory_(subfactory) {
+	assert(subfactory_);
 }
 
-QVariant SubfacItemListModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant IngredientsModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role != Qt::ItemDataRole::DisplayRole || orientation != Qt::Horizontal) {
         return {};
     }
@@ -32,8 +32,8 @@ QVariant SubfacItemListModel::headerData(int section, Qt::Orientation orientatio
     return {};
 }
 
-QVariant SubfacItemListModel::data(const QModelIndex &index, int role) const {
-    const auto& item = item_list_.at(index.row());
+QVariant IngredientsModel::data(const QModelIndex &index, int role) const {
+    const auto& item = (*subfactory_)->ingredientAt(index.row());
     const auto column = static_cast<Column> (index.column());
 
     if (role == Qt::ItemDataRole::DisplayRole) {
@@ -51,19 +51,9 @@ QVariant SubfacItemListModel::data(const QModelIndex &index, int role) const {
     return {};
 }
 
-void SubfacItemListModel::refreshModel() {
+void IngredientsModel::refreshModel() {
     beginResetModel();
     endResetModel();
-}
-
-void SubfacItemListModel::refreshModel(std::vector<std::shared_ptr<plan::LineTarget>> new_list) {
-    item_list_.clear();
-	item_list_ = std::move(new_list);
-    refreshModel();
-}
-
-std::shared_ptr<plan::LineTarget> SubfacItemListModel::getTarget(const QModelIndex& index) const {
-    return item_list_.at(index.row());
 }
 
 }

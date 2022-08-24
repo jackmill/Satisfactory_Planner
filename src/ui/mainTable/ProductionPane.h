@@ -17,9 +17,12 @@
 #include <QTableView>
 #include <QAction>
 
+#include <memory>
+
 #include "ProductionTableModel.h"
-#include "SubfacItemListModel.h"
+#include "IngredientsModel.h"
 #include "ProductModel.h"
+#include "ByproductsModel.h"
 
 #include "plan/Factory.h"
 
@@ -28,15 +31,15 @@ namespace ui {
 class ProductionPane final : public QWidget {
     Q_OBJECT
   public:
-    ProductionPane(const std::shared_ptr<plan::Subfactory>& subfactory, std::shared_ptr<data::Library> db, QWidget* parent = nullptr);
+    ProductionPane(plan::Subfactory* subfactory, data::Library* db, QWidget* parent = nullptr);
 
 
     void resizeAll();
-	void changeSubfactory(std::shared_ptr<plan::Subfactory> subfactory);
+	void changeSubfactory(plan::Subfactory* subfactory);
 
   private:
-    plan::Subfactory_Ptr subfactory_;
-    std::shared_ptr<data::Library> db_;
+    std::unique_ptr<plan::Subfactory*> subfactory_;
+    data::Library* db_;
 
     QGroupBox* products_widget_ = nullptr;
     QVBoxLayout* products_layout_ = nullptr;
@@ -46,12 +49,12 @@ class ProductionPane final : public QWidget {
     QGroupBox* byproducts_widget_ = nullptr;
     QVBoxLayout* byproducts_layout_ = nullptr;
     QTableView* byproducts_ = nullptr;
-    SubfacItemListModel* byproducts_model_ = nullptr;
+    ByproductsModel* byproducts_model_ = nullptr;
 
     QGroupBox* ingredients_widget_ = nullptr;
     QVBoxLayout* ingredients_layout_ = nullptr;
     QTableView* ingredients_ = nullptr;
-    SubfacItemListModel* ingredients_model_ = nullptr;
+    IngredientsModel* ingredients_model_ = nullptr;
 
     QTableView* production_table_ = nullptr;
     ProductionTableModel* table_model_ = nullptr;
@@ -118,7 +121,7 @@ class ProductionPane final : public QWidget {
     void S_addNewTarget();
     void S_editTarget(const QModelIndex &index);
     void S_removeTarget(const QModelIndex& index);
-    void S_addToTable(std::shared_ptr<plan::LineTarget> target);
+    void S_addToTable(plan::TableItem* target);
 	void S_refreshAll();
 	void S_productSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 	void S_prodTableContextMenu(const QModelIndex& index);

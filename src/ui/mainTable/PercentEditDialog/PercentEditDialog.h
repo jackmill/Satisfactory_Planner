@@ -23,7 +23,7 @@ namespace ui {
 class PercentEditDialog final: public QDialog {
 	Q_OBJECT
   public:
-	explicit PercentEditDialog(plan::ProductLine& product_line, QWidget* parent = nullptr);
+	explicit PercentEditDialog(plan::ProductLine* product_line, QWidget* parent = nullptr);
 
 	[[nodiscard]] float selectedPercent() const { return static_cast<float> (percent_target_->value()); };
 
